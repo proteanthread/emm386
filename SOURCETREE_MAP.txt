@@ -17,6 +17,10 @@ File: docs\COMPILERS_GUIDE.md
 Size: 5155 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
+File: docs\DPMI_COMPLIANCE.md
+Size: 5978 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
 File: docs\EMS_UMB_SPEC.md
 Size: 8928 bytes
 Description: Repository source or configuration asset.
@@ -39,6 +43,10 @@ Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\USERS_GUIDE.md
 Size: 5202 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: docs\WINDOWS_3X_COMPATIBILITY.md
+Size: 5120 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: History.txt
@@ -490,7 +498,7 @@ Size: 32578 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: SOURCETREE_MAP.txt
-Size: 69437 bytes
+Size: 69624 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: src\AUXIO.h
