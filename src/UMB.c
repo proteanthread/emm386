@@ -1,0 +1,383 @@
+/*
+ * umb.asm - --- XMS UMB part implementation --- Public Domain --- to be assembled with JWasm or Masm v6.1+ (C17 standard)
+ *
+ * Architectural Role:
+ *   Serves as the C counterpart source representing UMB.ASM.
+ *
+ * Changeability & Constraints:
+ *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
+ *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ *
+ * Expected Behavior:
+ *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *
+ * Diagnostics & Recovery:
+ *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ */
+
+// .486P
+// .model FLAT
+void umb_handler(void) // fall thru!
+{
+    /*
+     * Mapped logic from umb_handler in UMB.ASM:
+     * umb_handler proc public
+     * 
+     *     cmp ah,11h          ;free UMB, DX=segment address to release
+     *     je UMB_free
+     *     cmp ah,12h          ;realloc UMB, DX=segment to resize, BX=new size
+     *     je UMB_realloc
+     * 
+     * umb_handler endp        ;fall thru!
+     */
+}
+
+
+// --- UMBalloc
+// --- inp: DX=size of block in paragraphs, size=0 is allowed
+// --- out: success: AX=1, BX=segment, DX=size
+// ---      error:   AX=0, BL=error code, DX=largest block
+
+void UMB_alloc(void) // fall throu
+{
+    /*
+     * Mapped logic from UMB_alloc in UMB.ASM:
+     * UMB_alloc proc
+     * 
+     *     @dprintf ?UMBDBG, <"UMBalloc enter, DX=%X",10>, dx
+     *     mov esi, offset UMBsegments
+     *     xor ebx,ebx     ; holds largest too-small block size
+     * 
+     * @@UMBloop:
+     *     cmp [esi].UMBBLK.wSegm,0    ; see if valid UMB
+     *     je @@UMBnext                ; no
+     *     test BYTE PTR [esi].UMBBLK.wSize+1,UMB_ALLOCATED
+     *     jne @@UMBnext               ;  yes
+     *     cmp dx,[esi].UMBBLK.wSize   ; dx = requested block size (high bit of UMB size known reset)
+     *     jbe @@UMBfound              ; enough memory available in UMB
+     *     cmp bx,[esi].UMBBLK.wSize
+     *     ja @@UMBnext
+     *     mov bx,[esi].UMBBLK.wSize   ; update largest too-small block size
+     * @@UMBnext:
+     *     add esi,size UMBBLK
+     *     cmp esi,offset UMBend
+     *     jnz @@UMBloop
+     *     @dprintf ?UMBDBG, <"UMBalloc failed, bx=%X",10>, bx
+     *     xor eax,eax     ; flag failure
+     *     or ebx,ebx
+     *     jne @@umb_too_small
+     *     mov bl,0B1h     ; error "no UMB's are available"
+     *     xor edx,edx
+     *     jmp UMB_exit
+     * @@umb_too_small:
+     *     mov edx,ebx     ; return largest UMB in DX
+     *     mov bl,0B0h     ; error "only smaller UMB available"
+     *     jmp UMB_exit
+     * 
+     * @@UMBfound:
+     * 
+     * ; see if actual UMB size exceeds request size by >=2K
+     * 
+     *     mov ax,80h              ; 128 paras == 2K
+     *     add ax,dx
+     *     cmp ax,[esi].UMBBLK.wSize
+     *     ja @@good_umb          ; can't split it, just use it
+     * 
+     * ;  2K or over would be unused, see if we can split the block
+     * 
+     *     mov ebx, offset UMBsegments
+     * @@splitloop:
+     *     cmp [ebx].UMBBLK.wSegm,0
+     *     je @@freefound
+     *     add ebx,size UMBBLK
+     *     cmp ebx,offset UMBend
+     *     jne @@splitloop
+     *     jmp @@good_umb
+     * 
+     * ;-- an unused entry found, split the block
+     * 
+     * @@freefound:
+     *     mov eax, edx
+     *     add eax, 7Fh
+     *     and eax,not 7Fh             ; round up allocation to next 2K in paras
+     *     mov cx,[esi].UMBBLK.wSegm
+     *     add cx,ax
+     *     mov [ebx].UMBBLK.wSegm,cx   ; new block has segment offset of old block+allocation
+     *     mov cx,[esi].UMBBLK.wSize   ; get original UMB block size, in paras
+     *     sub cx,ax                   ; subtract allocation
+     *     mov [ebx].UMBBLK.wSize,cx   ; update new block with old block size minus allocation
+     *     mov [esi].UMBBLK.wSize,ax   ; update original UMB block size to allocation
+     *     @dprintf ?UMBDBG, <"UMB block split, new entry=%X segm=%X size=%X",10>, ebx, [ebx].UMBBLK.wSegm, [ebx].UMBBLK.wSize
+     * 
+     * @@good_umb:
+     *     mov dx,[esi].UMBBLK.wSize               ; return actual block size in dx
+     *     or BYTE PTR [esi].UMBBLK.wSize+1,UMB_ALLOCATED
+     *     mov bx,[esi].UMBBLK.wSegm               ; get UMB segment address in bx
+     *     mov word ptr [EBP].Client_Reg_Struc.Client_EBX,bx
+     *     mov ax,1
+     * UMB_alloc endp  ;fall throu
+     */
+}
+
+
+// --- there was a problem with JWasm if there's a jump to a forward
+// --- reference which is not a simple label but a PROC! If the
+// --- jump cannot be SHORT, the displacement isn't adjusted then!
+
+void UMB_exit(void)
+{
+    /*
+     * Mapped logic from UMB_exit in UMB.ASM:
+     * UMB_exit proc
+     * ;UMB_exit:
+     *     @dprintf ?UMBDBG, <"UMB exit, ax=%X, bx=%X, dx=%X",10>, ax, bx, dx
+     *     mov word ptr [ebp].Client_Reg_Struc.Client_EAX, ax
+     *     mov word ptr [ebp].Client_Reg_Struc.Client_EDX, dx
+     *     and al,al
+     *     jnz @@umbexit_noerror
+     *     mov byte ptr [ebp].Client_Reg_Struc.Client_EBX, bl
+     * @@umbexit_noerror:
+     *     ret
+     * UMB_exit endp
+     */
+}
+
+
+// --- UMBFree
+// --- todo: merge free blocks
+
+// UMB_free proc
+// UMB_free:
+// @dprintf ?UMBDBG, <"UMBfree enter, DX=%X",10>, dx
+
+// call UMB_findblock // clears eax
+// jc  UMB_exit
+// and BYTE PTR [esi].UMBBLK.wSize+1,7fh // flag UMB not allocated
+// inc eax // flag success
+// jmp UMB_exit
+
+// UMB_free endp
+
+// --- UMBrealloc
+// --- currently can only shrink a block
+// --- and it does not really shrink, just return success
+// --- inp: DX=segment, BX=new size of block in paragraphs
+
+void UMB_realloc(void)
+{
+    /*
+     * Mapped logic from UMB_realloc in UMB.ASM:
+     * UMB_realloc proc
+     * 
+     * ;;  mov ebx,[ebp].Client_Reg_Struc.Client_EBX   ; restore EBX
+     * 
+     *     @dprintf ?UMBDBG, <"UMBrealloc enter, DX=%X, BX=%X",10>, dx, bx
+     * 
+     *     call UMB_findblock  ;clears eax
+     *     jc UMB_exit
+     *     mov cx, [esi].UMBBLK.wSize
+     *     and ch, 7Fh
+     *     cmp bx, cx
+     *     ja @@umbreal_error
+     *     inc eax         ; flag success
+     *     jmp UMB_exit
+     * @@umbreal_error:    ; block is too small
+     *     mov dx,cx
+     *     mov bl,0B0h
+     *     jmp UMB_exit
+     * 
+     * UMB_realloc endp
+     */
+}
+
+
+void UMB_findblock(void)
+{
+    /*
+     * Mapped logic from UMB_findblock in UMB.ASM:
+     * UMB_findblock proc
+     *     mov esi,offset UMBsegments
+     *     xor eax,eax                 ; flag failure
+     * @@freeloop:
+     *     cmp [esi].UMBBLK.wSegm,dx   ; see if matches existing UMB allocation
+     *     je  @@blockfound
+     *     add esi,size UMBBLK
+     *     cmp esi,offset UMBend
+     *     jnz @@freeloop
+     * @@blocknotalloced:
+     *     mov bl,0b2h                 ; invalid UMB segment number error code
+     *     stc
+     *     ret
+     * @@blockfound:
+     *     test byte ptr [esi].UMBBLK.wSize+1,UMB_ALLOCATED
+     *     jz @@blocknotalloced
+     *     clc
+     *     ret
+     *     align 4
+     * UMB_findblock endp
+     */
+}
+
+
+// .text$03 ends
+
+// .text$04 segment
+
+// --- UMB initialization code
+// --- in: ESI->JemmIni
+// --- preserves esi, ebp
+
+void UMB_Init(void)
+{
+    /*
+     * Mapped logic from UMB_Init in UMB.ASM:
+     * UMB_Init proc public
+     *     mov ebx,[esi].JEMMINIT.PageMap
+     *     mov ecx,0A0h
+     *     mov edi,offset UMBsegments - size UMBBLK
+     *     mov dl,0
+     * @@nextitem2:
+     *     mov al,[ebx+ecx]
+     *     call IsShadowRAM
+     *     jnc @@isshadow
+     *     cmp [esi].JEMMINIT.NoRAM,0
+     *     jnz @@skippage2
+     *     call IsUMBMemory
+     *     jc @@skippage2
+     * @@isshadow:
+     *     cmp dl,0
+     *     jz @@newumb
+     * if ?SPLIT
+     *     cmp al,'8'      ;is it a SPLIT ROM?
+     *     jb @@newumb    ;then it must be a new UMB
+     * endif
+     *     add [edi].UMBBLK.wSize,100h
+     *     call clearpage
+     *     jmp @@nextpage
+     * @@newumb:
+     *     add edi, size UMBBLK
+     *     cmp edi, offset UMBsegments + UMB_MAX_BLOCKS * size UMBBLK
+     *     jnc @@umbdone
+     *     inc [esi].JEMMINIT.NumUMBs
+     *     mov byte ptr [edi].UMBBLK.wSegm+1,cl
+     *     @dprintf ?INITDBG, <"new UMB at %X",10>, [edi].UMBBLK.wSegm
+     *     mov [edi].UMBBLK.wSize,100h
+     * if ?SPLIT
+     *     call clearpageEx
+     * else
+     *     call clearpage
+     * endif
+     *     mov dl,1
+     *     jmp @@nextpage
+     * @@skippage2:
+     *     mov dl,0
+     * @@nextpage:
+     *     inc ecx
+     *     cmp cl,0F8h
+     *     jb @@nextitem2
+     * @@umbdone:
+     *     @dprintf ?INITDBG, <"UMBs initialized",10>
+     *     ret
+     * UMB_Init endp
+     */
+}
+
+
+void IsShadowRAM(void)
+{
+    /*
+     * Mapped logic from IsShadowRAM in UMB.ASM:
+     * IsShadowRAM proc
+     *     cmp al,'S'
+     *     jnz @@isnotshadow
+     *     push ecx
+     *     shl ecx,12
+     *     mov ah,[ecx]
+     *     mov byte ptr [ecx],55h
+     *     cmp byte ptr [ecx],55h
+     *     jnz @@isnotshadow2
+     *     mov byte ptr [ecx],0AAh
+     *     cmp byte ptr [ecx],0AAh
+     *     jnz @@isnotshadow2
+     *     mov [ecx],ah
+     *     pop ecx
+     *     ret
+     * @@isnotshadow2:
+     *     mov [ecx],ah
+     *     pop ecx
+     * @@isnotshadow:
+     *     stc
+     *     ret
+     * IsShadowRAM endp
+     */
+}
+
+
+// --- clear an UMB "page"
+// --- in: ecx = page number
+// --- in: al = page type, if '1' <= al < '8' then split ROM
+// --- in: EDI -> UMBBLK
+
+// if ?SPLIT
+
+void clearpageEx(void)
+{
+    /*
+     * Mapped logic from clearpageEx in UMB.ASM:
+     * clearpageEx proc
+     *     cmp al,'8'
+     *     jnc clearpage
+     *     sub al,'0'  ;1,2,3,4,5,6,7
+     *     movzx eax,al
+     *     shl eax,5   ;20,40,60,80,A0,C0,E0
+     *     mov byte ptr [edi].UMBBLK.wSegm,al
+     *     sub word ptr [edi].UMBBLK.wSize,ax
+     *     @dprintf ?INITDBG, <"split page, UMB at %X size=%X",10>, [edi].UMBBLK.wSegm, [edi].UMBBLK.wSize
+     *     shl eax,4   ;1->200, 2->400, 3->600, 4->800, 5->A00, 6->C00, 7->E00
+     *     push edi
+     *     push ecx
+     *     mov edi,ecx
+     *     shl edi,12
+     *     add edi,eax
+     *     sub eax,1000h
+     *     neg eax
+     *     shr eax,2      ;added in v5.78
+     *     mov ecx,eax
+     *     xor eax,eax
+     *     rep stosd
+     *     pop ecx
+     *     pop edi
+     *     ret
+     * clearpageEx endp
+     */
+}
+
+
+// endif
+
+// --- clear a "page"
+// --- in: ecx = page number
+
+void clearpage(void)
+{
+    /*
+     * Mapped logic from clearpage in UMB.ASM:
+     * clearpage proc
+     *     push edi
+     *     push ecx
+     *     mov edi,ecx
+     *     shl edi,12
+     *     mov ecx,1000h/4
+     *     xor eax,eax
+     *     rep stosd
+     *     pop ecx
+     *     pop edi
+     *     ret
+     * clearpage endp
+     */
+}
+
+
+// .text$04 ends
+
+// END

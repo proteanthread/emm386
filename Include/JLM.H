@@ -1,24 +1,26 @@
 
-/* Header file for Jemm JLMs which defines the subset of the Win3x/Win9x */
-/* ring 0 API (VMM) that Jemm/JLoad exposes.                             */
-/* The parameters and return values of the functions are the same as in  */
-/* the Windows implementation, register usage is as in Win32: EAX, ECX   */
-/* and EDX may be modified inside functions, the other registers are     */
-/* preserved (exception: Get_Cur_VM_Handle).                             */
+/*
+ * Header file for Jemm JLMs which defines the subset of the Win3x/Win9x
+ * ring 0 API (VMM) that Jemm/JLoad exposes.
+ * The parameters and return values of the functions are the same as in
+ * the Windows implementation, register usage is as in Win32: EAX, ECX
+ * and EDX may be modified inside functions, the other registers are
+ * preserved (exception: Get_Cur_VM_Handle).
+ */
 
 typedef unsigned char   UCHAR;
 typedef unsigned short  USHORT;
 typedef unsigned long   ULONG;
 
 struct Pushad_Struc {
-    ULONG Pushad_EDI;       /* Client's EDI */
-    ULONG Pushad_ESI;       /* Client's ESI */
-    ULONG Pushad_EBP;       /* Client's EBP */
-    ULONG Pushad_ESP;       /* ESP before pushad */
-    ULONG Pushad_EBX;       /* Client's EBX */
-    ULONG Pushad_EDX;       /* Client's EDX */
-    ULONG Pushad_ECX;       /* Client's ECX */
-    ULONG Pushad_EAX;       /* Client's EAX */
+    ULONG Pushad_EDI;       // Client's EDI
+    ULONG Pushad_ESI;       // Client's ESI
+    ULONG Pushad_EBP;       // Client's EBP
+    ULONG Pushad_ESP;       // ESP before pushad
+    ULONG Pushad_EBX;       // Client's EBX
+    ULONG Pushad_EDX;       // Client's EDX
+    ULONG Pushad_ECX;       // Client's ECX
+    ULONG Pushad_EAX;       // Client's EAX
 };
 
 #define VMM_DEVICE_ID       0x00001
@@ -42,7 +44,7 @@ struct Pushad_Struc {
 
 #define VXDINLINE static __inline
 
-/*  */
+//  
 
 #define GetVxDServiceAddress(service)   service
 
@@ -144,37 +146,37 @@ VMM_Service (Get_DDB)
 End_Service_Table(VMM, VMM)
 
 struct cb_s {
-    ULONG CB_VM_Status;     /* VM status flags */
-    ULONG CB_High_Linear;   /* Address of VM mapped high */
+    ULONG CB_VM_Status;     // VM status flags
+    ULONG CB_High_Linear;   // Address of VM mapped high
     ULONG CB_Client_Pointer;
     ULONG CB_VMID;
     ULONG CB_Signature;
 };
 
 struct Client_Reg_Struc {
-    ULONG Client_EDI;       /* Client's EDI */
-    ULONG Client_ESI;       /* Client's ESI */
-    ULONG Client_EBP;       /* Client's EBP */
-    ULONG Client_res0;      /* ESP at pushall */
-    ULONG Client_EBX;       /* Client's EBX */
-    ULONG Client_EDX;       /* Client's EDX */
-    ULONG Client_ECX;       /* Client's ECX */
-    ULONG Client_EAX;       /* Client's EAX */
+    ULONG Client_EDI;       // Client's EDI
+    ULONG Client_ESI;       // Client's ESI
+    ULONG Client_EBP;       // Client's EBP
+    ULONG Client_res0;      // ESP at pushall
+    ULONG Client_EBX;       // Client's EBX
+    ULONG Client_EDX;       // Client's EDX
+    ULONG Client_ECX;       // Client's ECX
+    ULONG Client_EAX;       // Client's EAX
     ULONG Client_IntNo;
-    ULONG Client_Error;     /* Dword error code */
-    ULONG Client_EIP;       /* EIP */
-    USHORT Client_CS;       /* CS */
-    USHORT Client_res1;     /*   (padding) */
-    ULONG Client_EFlags;    /* EFLAGS */
-    ULONG Client_ESP;       /* ESP */
-    USHORT Client_SS;       /* SS */
-    USHORT Client_res2;     /*   (padding) */
-    USHORT Client_ES;       /* ES */
-    USHORT Client_res3;     /*   (padding) */
-    USHORT Client_DS;       /* DS */
-    USHORT Client_res4;     /*   (padding) */
-    USHORT Client_FS;       /* FS */
-    USHORT Client_res5;     /*   (padding) */
-    USHORT Client_GS;       /* GS */
-    USHORT Client_res6;     /*   (padding) */
+    ULONG Client_Error;     // Dword error code
+    ULONG Client_EIP;       // EIP
+    USHORT Client_CS;       // CS
+    USHORT Client_res1;     //   (padding)
+    ULONG Client_EFlags;    // EFLAGS
+    ULONG Client_ESP;       // ESP
+    USHORT Client_SS;       // SS
+    USHORT Client_res2;     //   (padding)
+    USHORT Client_ES;       // ES
+    USHORT Client_res3;     //   (padding)
+    USHORT Client_DS;       // DS
+    USHORT Client_res4;     //   (padding)
+    USHORT Client_FS;       // FS
+    USHORT Client_res5;     //   (padding)
+    USHORT Client_GS;       // GS
+    USHORT Client_res6;     //   (padding)
 };

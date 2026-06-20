@@ -1,0 +1,1275 @@
+================================================================================
+LibreDOS EMM386 / JEMM Memory Manager Workspace Source Tree Map
+================================================================================
+This document lists all files in the EMM386 repository, including their path,
+size in bytes, and a brief description of their functionality.
+================================================================================
+
+File: Artistic.txt
+Size: 4922 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: docs\EMS_UMB_SPEC.md
+Size: 8928 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: docs\flowchart.md
+Size: 5016 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: History.txt
+Size: 28578 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: Html\Readme.html
+Size: 33178 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Include\FILEACC.h
+Size: 3659 bytes
+Description: fileacc.inc - --- dos file access for JLMs --- although addresses are linear, they must --- be wi...
+--------------------------------------------------------------------------------
+File: Include\FILEACC.INC
+Size: 2158 bytes
+Description: --- dos file access for JLMs --- although addresses are linear, they must --- be within 64 kB distance of v86 DS regi...
+--------------------------------------------------------------------------------
+File: Include\FINDRES.h
+Size: 7736 bytes
+Description: findres.inc - Interface mapping for FINDRES.INC (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: Include\FINDRES.INC
+Size: 4726 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Include\JLM.H
+Size: 5482 bytes
+Description: Header file for Jemm JLMs which defines the subset of the Win3x/Win9x ring 0 API (VMM) that Jemm/...
+--------------------------------------------------------------------------------
+File: Include\JLM.INC
+Size: 9165 bytes
+Description: --- this is an assembler include file in MASM format, --- to be used for JLMs (Jemm Loadable Modules). --- it defines...
+--------------------------------------------------------------------------------
+File: Include\JLMFASM.h
+Size: 1567 bytes
+Description: jlmfasm.inc - --- this is an assembler include file in FASM format --- to be used for JLMs (Jemm ...
+--------------------------------------------------------------------------------
+File: Include\JLMFASM.INC
+Size: 7925 bytes
+Description: --- this is an assembler include file in FASM format --- to be used for JLMs (Jemm Loadable Modules). --- it defines ...
+--------------------------------------------------------------------------------
+File: Include\LMS64.h
+Size: 4323 bytes
+Description: 64-bit flat memory module (LMS64) & 64-bit DPMI declarations (C17 standard)
+--------------------------------------------------------------------------------
+File: Include\PRINTF.h
+Size: 5556 bytes
+Description: printf.inc - --- simple printf --- i64toa(long long n, char s, int base); --- convert 64-bit long...
+--------------------------------------------------------------------------------
+File: Include\PRINTF.INC
+Size: 3236 bytes
+Description: --- simple printf --- i64toa(long long n, char * s, int base); --- convert 64-bit long long to string
+--------------------------------------------------------------------------------
+File: JemmExL.mak
+Size: 3203 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: JLM\AHCICD\AHCICD.ASM
+Size: 25020 bytes
+Description: --- JLM to read CD/DVD in AHCI mode. --- "cooked" mode is supported only.
+--------------------------------------------------------------------------------
+File: JLM\AHCICD\AHCICD.c
+Size: 26055 bytes
+Description: ahcicd.asm - --- JLM to read CD/DVD in AHCI mode. --- "cooked" mode is supported only. (C17 stand...
+--------------------------------------------------------------------------------
+File: JLM\AHCICD\AHCICD.txt
+Size: 722 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\AHCICD\MAKE.BAT
+Size: 221 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\AHCICD\MAKEM.BAT
+Size: 138 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\GENERIC\GENERIC.ASM
+Size: 2480 bytes
+Description: --- JLM sample GENERIC --- use Makefile to create GENERIC.DLL --- GENERIC is a very simple JLM. It doesn't hook v86-i...
+--------------------------------------------------------------------------------
+File: JLM\GENERIC\GENERIC.c
+Size: 4294 bytes
+Description: generic.asm - --- JLM sample GENERIC --- use Makefile to create GENERIC.DLL --- GENERIC is a very...
+--------------------------------------------------------------------------------
+File: JLM\GENERIC\MAKEFILE
+Size: 898 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: JLM\GENERIC\README.TXT
+Size: 1373 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\GENERIC\TESTGEN.ASM
+Size: 670 bytes
+Description: --- test app which calls some "services" of JLM GENERIC. --- assemble: JWasm -bin -Fo testgen.com testgen.asm
+--------------------------------------------------------------------------------
+File: JLM\GENERIC\TESTGEN.c
+Size: 1355 bytes
+Description: testgen.asm - --- test app which calls some "services" of JLM GENERIC. --- assemble: JWasm -bin -...
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\HELLO2.C
+Size: 921 bytes
+Description: Another JLM "hello world", this time written in C. Designed for Microsoft Visual C++ and standard...
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\HELLO2W.C
+Size: 695 bytes
+Description: Another JLM "hello world", this time written in C. Designed for Open Watcom C and standard-compli...
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\hello2w.obj
+Size: 726 bytes
+Description: Compiled repository asset or binary object.
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\JLMW.ASM
+Size: 690 bytes
+Description: --- helpers for (Watcom) C
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\JLMW.c
+Size: 1902 bytes
+Description: jlmw.asm - --- helpers for (Watcom) C (C17 standard) Architectural Role: Serves as the C counterp...
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\JLMW.h
+Size: 330 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\MAKEJLMW.BAT
+Size: 95 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\MAKEOW.BAT
+Size: 238 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\MAKEVC.BAT
+Size: 205 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\HELLO2\README.TXT
+Size: 221 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\HELLO\HELLO.ASM
+Size: 1393 bytes
+Description: --- a simple JLM which displays a message onto the screen --- with the help of v86-int 21h and nested execution
+--------------------------------------------------------------------------------
+File: JLM\HELLO\HELLO.c
+Size: 2278 bytes
+Description: hello.asm - --- a simple JLM which displays a message onto the screen --- with the help of v86-in...
+--------------------------------------------------------------------------------
+File: JLM\HELLO\hello.obj
+Size: 373 bytes
+Description: Compiled repository asset or binary object.
+--------------------------------------------------------------------------------
+File: JLM\HELLO\MAKE.BAT
+Size: 886 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\HELLO\MAKEOW.BAT
+Size: 237 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\HELLO\MAKEVC.BAT
+Size: 196 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\HELLO\README.TXT
+Size: 207 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\IOTRAP\IOTRAP.ASM
+Size: 4751 bytes
+Description: --- JLM sample IOTRAP --- use Makefile to create IOTRAP.DLL --- IOTRAP traps IO port 100h when the first client --- w...
+--------------------------------------------------------------------------------
+File: JLM\IOTRAP\IOTRAP.c
+Size: 7403 bytes
+Description: iotrap.asm - --- JLM sample IOTRAP --- use Makefile to create IOTRAP.DLL --- IOTRAP traps IO port...
+--------------------------------------------------------------------------------
+File: JLM\IOTRAP\MAKEFILE
+Size: 1004 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: JLM\IOTRAP\README.TXT
+Size: 779 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\IOTRAP\TESTIOT.ASM
+Size: 2021 bytes
+Description: --- tsr to test JLM IOTRAP. --- it installs a callback which is called whenever port 100h --- is accessed. --- the ca...
+--------------------------------------------------------------------------------
+File: JLM\IOTRAP\TESTIOT.c
+Size: 2801 bytes
+Description: testiot.asm - --- tsr to test JLM IOTRAP. --- it installs a callback which is called whenever por...
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\JCLOCK.ASM
+Size: 4677 bytes
+Description: JCLOCK 1.1 JLM example -- CLOCK for JEMM386/JEMMEX It is the first JLM with screen input/output :-) (C) 2007 Alexey V...
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\JCLOCK.c
+Size: 5102 bytes
+Description: jclock.asm - JCLOCK 1.1 JLM example -- CLOCK for JEMM386/JEMMEX It is the first JLM with screen i...
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\JCLOCK2.ASM
+Size: 4289 bytes
+Description: this is a modified JCLOCK version which uses the Jemm API to hook int 1Ch. Thus, it can be unloaded. (C) 2007 Alexey ...
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\JCLOCK2.c
+Size: 5007 bytes
+Description: jclock2.asm - this is a modified JCLOCK version which uses the Jemm API to hook int 1Ch. Thus, it...
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\JCLOCK3.ASM
+Size: 3471 bytes
+Description: --- JCLOCK2 in Masm/JWasm syntax
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\JCLOCK3.c
+Size: 5043 bytes
+Description: jclock3.asm - --- JCLOCK2 in Masm/JWasm syntax (C17 standard) Architectural Role: Serves as the C...
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\MAKE.BAT
+Size: 156 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\MAKE3.BAT
+Size: 113 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\JCLOCK\README.TXT
+Size: 584 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\JLSTUB\Build\jlstub.bin
+Size: 585 bytes
+Description: Compiled repository asset or binary object.
+--------------------------------------------------------------------------------
+File: JLM\JLSTUB\Build\JLSTUB.lst
+Size: 23300 bytes
+Description: Compiled repository asset or binary object.
+--------------------------------------------------------------------------------
+File: JLM\JLSTUB\JLSTUB.ASM
+Size: 7068 bytes
+Description: --- MZ stub to run jload.exe --- to be assembled with Masm or JWasm --- it's a derivate of dpmildxx...
+--------------------------------------------------------------------------------
+File: JLM\JLSTUB\JLSTUB.c
+Size: 10446 bytes
+Description: jlstub.asm - --- MZ stub to run jload.exe --- to be assembled with Masm or JWasm --- it's a deriv...
+--------------------------------------------------------------------------------
+File: JLM\JLSTUB\JLStub.txt
+Size: 293 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\JLSTUB\Make.BAT
+Size: 108 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\KEYBGR\KEYBGR.ASM
+Size: 9201 bytes
+Description: *** german keyboard driver for MF keyboards --- the first JLM (Jemm Loadable Module) ever. --- v1.0: initial --- v1.1...
+--------------------------------------------------------------------------------
+File: JLM\KEYBGR\KEYBGR.c
+Size: 10859 bytes
+Description: keybgr.asm - german keyboard driver for MF keyboards --- the first JLM (Jemm Loadable Module) eve...
+--------------------------------------------------------------------------------
+File: JLM\KEYBGR\MAKE.BAT
+Size: 231 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\KEYBGR\MAKEFILE
+Size: 745 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: JLM\KEYBGR\README.TXT
+Size: 302 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\MAKE.BAT
+Size: 437 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\MAKEFILE
+Size: 900 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\QPIEMU.ASM
+Size: 5540 bytes
+Description: --- JLM sample QPIEMU --- use Makefile to create QPIEMU.DLL --- QPIEMU installs a small subset of Qemm's QPI, --- jus...
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\QPIEMU.c
+Size: 8158 bytes
+Description: qpiemu.asm - --- JLM sample QPIEMU --- use Makefile to create QPIEMU.DLL --- QPIEMU installs a sm...
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\QPIEMU.txt
+Size: 1584 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\MAKEFILE
+Size: 370 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\PRINTF16.h
+Size: 5376 bytes
+Description: printf16.inc - --- simple printf() implementation (C17 standard) Architectural Role: Serves as th...
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\PRINTF16.INC
+Size: 2958 bytes
+Description: --- simple printf() implementation
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\SETARGV.h
+Size: 4662 bytes
+Description: setargv.inc - --- read the commandline at PSP:81h --- and create an argc/argv structure on the st...
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\SETARGV.INC
+Size: 3094 bytes
+Description: --- read the commandline at PSP:81h --- and create an argc/argv structure on the stack. --- in: ES=PSP, DS=DGROUP, SS...
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\TESTDMA.ASM
+Size: 4612 bytes
+Description: --- test Qemm/QPIEMU ( IO trap part ) --- this time test ISA DMA ports
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\TESTDMA.c
+Size: 6714 bytes
+Description: testdma.asm - --- test Qemm/QPIEMU ( IO trap part ) --- this time test ISA DMA ports (C17 standar...
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\TESTQPI.ASM
+Size: 5282 bytes
+Description: --- test Qemm/QPIEMU ( IO trap part )
+--------------------------------------------------------------------------------
+File: JLM\QPIEMU\Test\TESTQPI.c
+Size: 7669 bytes
+Description: testqpi.asm - --- test Qemm/QPIEMU ( IO trap part ) (C17 standard) Architectural Role: Serves as ...
+--------------------------------------------------------------------------------
+File: JLM\README.TXT
+Size: 1207 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\FASTBOOT.ASM
+Size: 9946 bytes
+Description: --- Sample how to handle DEVICE_REBOOT_NOTIFY control message; --- handles fastboot only. --- Requires Jemm v5.86+. -...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\FASTBOOT.c
+Size: 14659 bytes
+Description: fastboot.asm - --- Sample how to handle DEVICE_REBOOT_NOTIFY control message; --- handles fastboo...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\FASTBOOT.txt
+Size: 1386 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\FASTBRM.ASM
+Size: 5147 bytes
+Description: --- real-mode part of the fastboot JLM; --- this code is moved to address 07E00h by the fastboot JLM; --- on entry: -...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\FASTBRM.c
+Size: 6262 bytes
+Description: fastbrm.asm - --- real-mode part of the fastboot JLM; --- this code is moved to address 07E00h by...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\FBOOT.ASM
+Size: 2711 bytes
+Description: --- Set /D and /P option for currently loaded fastboot JLM. --- This program uses the API installed by FASTBOOT.DLL; ...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\FBOOT.c
+Size: 4546 bytes
+Description: fboot.asm - --- Set /D and /P option for currently loaded fastboot JLM. --- This program uses the...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\LDI13EXT.ASM
+Size: 3223 bytes
+Description: --- sample how to load an int 13h extension into FASTBOOT JLM. --- this sample just swaps HDs 0 and 1 in int 13h; int...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\LDI13EXT.c
+Size: 5168 bytes
+Description: ldi13ext.asm - --- sample how to load an int 13h extension into FASTBOOT JLM. --- this sample jus...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\MAKE.BAT
+Size: 186 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\REBOOT.ASM
+Size: 1504 bytes
+Description: --- sample how to handle DEVICE_REBOOT_NOTIFY control message --- requires Jemm v5.86+
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\REBOOT.c
+Size: 2798 bytes
+Description: reboot.asm - --- sample how to handle DEVICE_REBOOT_NOTIFY control message --- requires Jemm v5.8...
+--------------------------------------------------------------------------------
+File: JLM\REBOOT\REBOOT.txt
+Size: 220 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\XCDROM32\History.txt
+Size: 1122 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\XCDROM32\MAKE.BAT
+Size: 193 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\XCDROM32\MAKEM.BAT
+Size: 217 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\XCDROM32\XCDROM32.ASM
+Size: 75792 bytes
+Description: XCDROM32.ASM - a JLM driver for UltraDMA CD-ROMs/DVDs based on XCDROM v1.9 by Jack R. Ellis released under the GNU GP...
+--------------------------------------------------------------------------------
+File: JLM\XCDROM32\XCDROM32.c
+Size: 55110 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: JLM\XCDROM32\XCDROM32.txt
+Size: 2182 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\History.txt
+Size: 1179 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\IDENTIFY.h
+Size: 15005 bytes
+Description: identify.inc - --- data returned by Identify Device from ATA disks --- it's 256 16-bit words. (C1...
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\IDENTIFY.INC
+Size: 13283 bytes
+Description: --- data returned by Identify Device from ATA disks --- it's 256 * 16-bit words.
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\MAKE.BAT
+Size: 265 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\MAKEM.BAT
+Size: 166 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\XDMA32.ASM
+Size: 52567 bytes
+Description: XDMA32.ASM - a JLM driver for UltraDMA hard-disks based on XDMA v3.3 by Jack R. Ellis released under the GNU GPL lice...
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\XDMA32.c
+Size: 36517 bytes
+Description: xdma32.asm - XDMA32.ASM - a JLM driver for UltraDMA hard-disks based on XDMA v3.3 by Jack R. Elli...
+--------------------------------------------------------------------------------
+File: JLM\XDMA32\XDMA32.txt
+Size: 1924 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: Makefile
+Size: 6818 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: Readme.txt
+Size: 32578 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: SOURCETREE_MAP.txt
+Size: 67695 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: src\AUXIO.h
+Size: 3009 bytes
+Description: auxio.inc - --- handle AUX I/O (C17 standard) Architectural Role: Serves as the C counterpart hea...
+--------------------------------------------------------------------------------
+File: src\AUXIO.INC
+Size: 1562 bytes
+Description: --- handle AUX I/O
+--------------------------------------------------------------------------------
+File: src\DEBUG.ASM
+Size: 3123 bytes
+Description: *** implements debug displays --- written by japheth --- public domain --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\DEBUG.c
+Size: 4577 bytes
+Description: debug.asm - implements debug displays --- written by japheth --- public domain --- to be assemble...
+--------------------------------------------------------------------------------
+File: src\DEBUG.h
+Size: 3292 bytes
+Description: debug.inc - Interface mapping for DEBUG.INC (C17 standard) Architectural Role: Serves as the C co...
+--------------------------------------------------------------------------------
+File: src\DEBUG.INC
+Size: 2503 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: src\DEBUG16.h
+Size: 1391 bytes
+Description: debug16.inc - Interface mapping for DEBUG16.INC (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: src\DEBUG16.INC
+Size: 656 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: src\DEBUGSYS.h
+Size: 12983 bytes
+Description: debugsys.inc - Real mode Debugger services: (C17 standard) Architectural Role: Serves as the C co...
+--------------------------------------------------------------------------------
+File: src\DEBUGSYS.INC
+Size: 11833 bytes
+Description: Real mode Debugger services:
+--------------------------------------------------------------------------------
+File: src\DEV.ASM
+Size: 7694 bytes
+Description: *** implements EMMXXXX0 device --- public domain --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\DEV.c
+Size: 9834 bytes
+Description: dev.asm - implements EMMXXXX0 device --- public domain --- to be assembled with JWasm or Masm v6....
+--------------------------------------------------------------------------------
+File: src\DMA.h
+Size: 1977 bytes
+Description: dma.inc - --- ports ISA DMA controller (C17 standard) Architectural Role: Serves as the C counter...
+--------------------------------------------------------------------------------
+File: src\DMA.INC
+Size: 1333 bytes
+Description: --- ports ISA DMA controller
+--------------------------------------------------------------------------------
+File: src\DPRINTF.h
+Size: 5263 bytes
+Description: dprintf.inc - --- printf for debug displays --- assume CS and SS flat; --- no assumptions about D...
+--------------------------------------------------------------------------------
+File: src\DPRINTF.INC
+Size: 3025 bytes
+Description: --- printf for debug displays --- assume CS and SS flat; --- no assumptions about DS/ES --- i64toa(long long n, char ...
+--------------------------------------------------------------------------------
+File: src\DPRNTF16.h
+Size: 5338 bytes
+Description: dprntf16.inc - --- printf for debug displays, 16-bit --- itoa(long n, char s, int base); --- conv...
+--------------------------------------------------------------------------------
+File: src\DPRNTF16.INC
+Size: 3007 bytes
+Description: --- printf for debug displays, 16-bit --- itoa(long n, char * s, int base); --- convert 32-bit long to string --- v5....
+--------------------------------------------------------------------------------
+File: src\EMS.ASM
+Size: 47262 bytes
+Description: --- EMS implementation --- EMS 4.0 is Public Domain, originally written by Michael Devore, --- extended and modified ...
+--------------------------------------------------------------------------------
+File: src\EMS.c
+Size: 55728 bytes
+Description: ems.asm - --- EMS implementation --- EMS 4.0 is Public Domain, originally written by Michael Devo...
+--------------------------------------------------------------------------------
+File: src\EMS.h
+Size: 2275 bytes
+Description: ems.inc - --- EMS status codes (C17 standard) Architectural Role: Serves as the C counterpart hea...
+--------------------------------------------------------------------------------
+File: src\EMS.INC
+Size: 1582 bytes
+Description: --- EMS status codes
+--------------------------------------------------------------------------------
+File: src\EMS32.h
+Size: 20414 bytes
+Description: ems32.inc - --- this is the Jemm EMS 3.2 implementation (functions 40h - 4Eh) --- since this part...
+--------------------------------------------------------------------------------
+File: src\EMS32.INC
+Size: 14348 bytes
+Description: --- this is the Jemm EMS 3.2 implementation (functions 40h - 4Eh) --- since this part is copyright Harald Albrecht/To...
+--------------------------------------------------------------------------------
+File: src\EMU.ASM
+Size: 2397 bytes
+Description: --- privileged opcode emulation --- copyright Tom Ehlert --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\EMU.c
+Size: 2882 bytes
+Description: emu.asm - --- privileged opcode emulation --- copyright Tom Ehlert --- to be assembled with JWasm...
+--------------------------------------------------------------------------------
+File: src\EXTERNAL.h
+Size: 5636 bytes
+Description: external.inc - --- publics for Jemm32 (C17 standard) Architectural Role: Serves as the C counterp...
+--------------------------------------------------------------------------------
+File: src\EXTERNAL.INC
+Size: 4523 bytes
+Description: --- publics for Jemm32
+--------------------------------------------------------------------------------
+File: src\I15.ASM
+Size: 4357 bytes
+Description: --- I15, ah=87 extended memory move --- Public Domain --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\I15.c
+Size: 4552 bytes
+Description: i15.asm - --- I15, ah=87 extended memory move --- Public Domain --- to be assembled with JWasm or...
+--------------------------------------------------------------------------------
+File: src\INIT.ASM
+Size: 37214 bytes
+Description: --- Jemm's initialization part --- Public Domain --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\INIT.c
+Size: 46901 bytes
+Description: init.asm - --- Jemm's initialization part --- Public Domain --- to be assembled with JWasm or Mas...
+--------------------------------------------------------------------------------
+File: src\INIT16.ASM
+Size: 66791 bytes
+Description: --- 16-bit initialization part --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\INIT16.c
+Size: 84327 bytes
+Description: init16.asm - --- 16-bit initialization part --- to be assembled with JWasm or Masm v6.1+ (C17 sta...
+--------------------------------------------------------------------------------
+File: src\JEMM.h
+Size: 8383 bytes
+Description: jemm.inc - --- common definitions for both Jemm32 and Jemm16 (C17 standard) Architectural Role: S...
+--------------------------------------------------------------------------------
+File: src\JEMM.INC
+Size: 7592 bytes
+Description: --- common definitions for both Jemm32 and Jemm16
+--------------------------------------------------------------------------------
+File: src\JEMM16.ASM
+Size: 30407 bytes
+Description: --- 16 bit part of Jemm; --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\JEMM16.c
+Size: 38175 bytes
+Description: jemm16.asm - --- 16 bit part of Jemm; --- to be assembled with JWasm or Masm v6.1+ (C17 standard)...
+--------------------------------------------------------------------------------
+File: src\JEMM16.h
+Size: 2123 bytes
+Description: jemm16.inc - --- globals for jemm16.asm and init16.asm (C17 standard) Architectural Role: Serves ...
+--------------------------------------------------------------------------------
+File: src\JEMM16.INC
+Size: 1340 bytes
+Description: --- globals for jemm16.asm and init16.asm
+--------------------------------------------------------------------------------
+File: src\JEMM32.ASM
+Size: 72524 bytes
+Description: ***************************************************************************** ** This is the main 32bit ASM part of J...
+--------------------------------------------------------------------------------
+File: src\JEMM32.c
+Size: 84872 bytes
+Description: jemm32.asm - This is the main 32bit ASM part of JEMM. JEMM contains code of FreeDOS Emm386, which...
+--------------------------------------------------------------------------------
+File: src\JEMM32.h
+Size: 9333 bytes
+Description: jemm32.inc - --- these files contains things for 32-bit ONLY (C17 standard) Architectural Role: S...
+--------------------------------------------------------------------------------
+File: src\JEMM32.INC
+Size: 8508 bytes
+Description: --- these files contains things for 32-bit ONLY
+--------------------------------------------------------------------------------
+File: src\LMS64.c
+Size: 8036 bytes
+Description: 64-bit flat memory module (LMS64) & 64-bit DPMI implementation (C17 standard)
+--------------------------------------------------------------------------------
+File: src\LMS64.obj
+Size: 2464 bytes
+Description: Compiled repository asset or binary object.
+--------------------------------------------------------------------------------
+File: src\POOL.ASM
+Size: 42157 bytes
+Description: --- Jemm's memory pool implementation --- originally written by Michael Devore --- Public Domain --- to be assembled ...
+--------------------------------------------------------------------------------
+File: src\POOL.c
+Size: 50606 bytes
+Description: pool.asm - --- Jemm's memory pool implementation --- originally written by Michael Devore --- Pub...
+--------------------------------------------------------------------------------
+File: src\UMB.ASM
+Size: 8736 bytes
+Description: --- XMS UMB part implementation --- Public Domain --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\UMB.c
+Size: 11185 bytes
+Description: umb.asm - --- XMS UMB part implementation --- Public Domain --- to be assembled with JWasm or Mas...
+--------------------------------------------------------------------------------
+File: src\VCPI.ASM
+Size: 16607 bytes
+Description: --- VCPI implementation --- Public Domain --- to be assembled with JWasm or Masm v6.1+ --- originally written by Mich...
+--------------------------------------------------------------------------------
+File: src\VCPI.c
+Size: 19727 bytes
+Description: vcpi.asm - --- VCPI implementation --- Public Domain --- to be assembled with JWasm or Masm v6.1+...
+--------------------------------------------------------------------------------
+File: src\VCPI.h
+Size: 1017 bytes
+Description: vcpi.inc - structure for VCPI switch from V86 to protected mode (C17 standard) Architectural Role...
+--------------------------------------------------------------------------------
+File: src\VCPI.INC
+Size: 390 bytes
+Description: structure for VCPI switch from V86 to protected mode
+--------------------------------------------------------------------------------
+File: src\VDMA.ASM
+Size: 18647 bytes
+Description: --- DMA port trapping code --- originally written by Harald Albrecht --- modified for Jemm by Japheth --- copyright (...
+--------------------------------------------------------------------------------
+File: src\VDMA.c
+Size: 22374 bytes
+Description: vdma.asm - --- DMA port trapping code --- originally written by Harald Albrecht --- modified for ...
+--------------------------------------------------------------------------------
+File: src\VDS.ASM
+Size: 26654 bytes
+Description: --- Jemm's VDS implementation --- Public Domain --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\VDS.c
+Size: 32847 bytes
+Description: vds.asm - --- Jemm's VDS implementation --- Public Domain --- to be assembled with JWasm or Masm ...
+--------------------------------------------------------------------------------
+File: src\VDS.h
+Size: 2919 bytes
+Description: vds.inc - --- VDS definitions --- flags in DX used by various VDS functions (C17 standard) Archit...
+--------------------------------------------------------------------------------
+File: src\VDS.INC
+Size: 2183 bytes
+Description: --- VDS definitions --- flags in DX used by various VDS functions
+--------------------------------------------------------------------------------
+File: src\X86.h
+Size: 3933 bytes
+Description: x86.inc - --- page table flags (C17 standard) Architectural Role: Serves as the C counterpart hea...
+--------------------------------------------------------------------------------
+File: src\X86.INC
+Size: 3105 bytes
+Description: --- page table flags
+--------------------------------------------------------------------------------
+File: src\XMS.ASM
+Size: 37051 bytes
+Description: --- XMS/A20 implementation --- Public Domain --- to be assembled with JWasm or Masm v6.1+
+--------------------------------------------------------------------------------
+File: src\XMS.c
+Size: 47931 bytes
+Description: xms.asm - --- XMS/A20 implementation --- Public Domain --- to be assembled with JWasm or Masm v6....
+--------------------------------------------------------------------------------
+File: src\XMS.h
+Size: 2945 bytes
+Description: xms.inc - --- XMS definitions (C17 standard) Architectural Role: Serves as the C counterpart head...
+--------------------------------------------------------------------------------
+File: src\XMS.INC
+Size: 2483 bytes
+Description: --- XMS definitions
+--------------------------------------------------------------------------------
+File: Test\BMINTRM.ASM
+Size: 1218 bytes
+Description: --- benchmark *** call int 69h a number of times and count timer ticks
+--------------------------------------------------------------------------------
+File: Test\BMINTRM.c
+Size: 2343 bytes
+Description: bmintrm.asm - --- benchmark call int 69h a number of times and count timer ticks (C17 standard) A...
+--------------------------------------------------------------------------------
+File: Test\EMS4E.ASM
+Size: 1655 bytes
+Description: *** test EMS get/set page map
+--------------------------------------------------------------------------------
+File: Test\EMS4E.c
+Size: 3108 bytes
+Description: ems4e.asm - test EMS get/set page map (C17 standard) Architectural Role: Serves as the C counterp...
+--------------------------------------------------------------------------------
+File: Test\EMS4F.ASM
+Size: 2303 bytes
+Description: *** test EMS get/set partial page map
+--------------------------------------------------------------------------------
+File: Test\EMS4F.c
+Size: 3935 bytes
+Description: ems4f.asm - test EMS get/set partial page map (C17 standard) Architectural Role: Serves as the C ...
+--------------------------------------------------------------------------------
+File: Test\EMS56.ASM
+Size: 3628 bytes
+Description: *** test int 67h, ah=56h (alter map and call)
+--------------------------------------------------------------------------------
+File: Test\EMS56.c
+Size: 5478 bytes
+Description: ems56.asm - test int 67h, ah=56h (alter map and call) (C17 standard) Architectural Role: Serves a...
+--------------------------------------------------------------------------------
+File: Test\EMS57.ASM
+Size: 2860 bytes
+Description: *** EMS move
+--------------------------------------------------------------------------------
+File: Test\EMS57.c
+Size: 4386 bytes
+Description: ems57.asm - EMS move (C17 standard) Architectural Role: Serves as the C counterpart source repres...
+--------------------------------------------------------------------------------
+File: Test\EMS57A.ASM
+Size: 4206 bytes
+Description: *** test EMS move (int 67h, ah=57h) *** move 1024 kB conv to EMS memory *** move 1024 kB EMS to EMS memory non-overla...
+--------------------------------------------------------------------------------
+File: Test\EMS57A.c
+Size: 6044 bytes
+Description: ems57a.asm - test EMS move (int 67h, ah=57h) move 1024 kB conv to EMS memory move 1024 kB EMS to ...
+--------------------------------------------------------------------------------
+File: Test\EMS5B.ASM
+Size: 1938 bytes
+Description: *** test EMS 5B --- 5b00: get alternate map register set ( if BL=0 on ret, es:di will be current pointer to context s...
+--------------------------------------------------------------------------------
+File: Test\EMS5B.c
+Size: 3212 bytes
+Description: ems5b.asm - test EMS 5B --- 5b00: get alternate map register set ( if BL=0 on ret, es:di will be ...
+--------------------------------------------------------------------------------
+File: Test\EXC00.ASM
+Size: 166 bytes
+Description: *** EXC 00
+--------------------------------------------------------------------------------
+File: Test\EXC00.c
+Size: 814 bytes
+Description: exc00.asm - EXC 00 (C17 standard) Architectural Role: Serves as the C counterpart source represen...
+--------------------------------------------------------------------------------
+File: Test\EXC06.ASM
+Size: 155 bytes
+Description: *** EXC 06 - requires a P6+ cpu
+--------------------------------------------------------------------------------
+File: Test\EXC06.c
+Size: 799 bytes
+Description: exc06.asm - EXC 06 - requires a P6+ cpu (C17 standard) Architectural Role: Serves as the C counte...
+--------------------------------------------------------------------------------
+File: Test\FRAMERES.ASM
+Size: 520 bytes
+Description: --- create binary: --- jwasm -bin -Fo frameres.com frameres.asm
+--------------------------------------------------------------------------------
+File: Test\FRAMERES.c
+Size: 1175 bytes
+Description: frameres.asm - --- create binary: --- jwasm -bin -Fo frameres.com frameres.asm (C17 standard) Arc...
+--------------------------------------------------------------------------------
+File: Test\HLTTEST.ASM
+Size: 1086 bytes
+Description: *** HLT test (v86)
+--------------------------------------------------------------------------------
+File: Test\HLTTEST.c
+Size: 2385 bytes
+Description: hlttest.asm - HLT test (v86) (C17 standard) Architectural Role: Serves as the C counterpart sourc...
+--------------------------------------------------------------------------------
+File: Test\HLTTEST2.ASM
+Size: 1092 bytes
+Description: *** HLT test (v86) with IF=0
+--------------------------------------------------------------------------------
+File: Test\HLTTEST2.c
+Size: 2404 bytes
+Description: hlttest2.asm - HLT test (v86) with IF=0 (C17 standard) Architectural Role: Serves as the C counte...
+--------------------------------------------------------------------------------
+File: Test\I15MOVE.ASM
+Size: 2134 bytes
+Description: *** move block by int 15h, ah=87h
+--------------------------------------------------------------------------------
+File: Test\I15MOVE.c
+Size: 3578 bytes
+Description: i15move.asm - move block by int 15h, ah=87h (C17 standard) Architectural Role: Serves as the C co...
+--------------------------------------------------------------------------------
+File: Test\MACROS.h
+Size: 776 bytes
+Description: macros.inc - Interface mapping for MACROS.INC (C17 standard) Architectural Role: Serves as the C ...
+--------------------------------------------------------------------------------
+File: Test\MACROS.INC
+Size: 98 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Test\MAKE.BAT
+Size: 115 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Test\PRINTF.h
+Size: 5363 bytes
+Description: printf.inc - --- simple printf() implementation (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: Test\PRINTF.INC
+Size: 2921 bytes
+Description: --- simple printf() implementation
+--------------------------------------------------------------------------------
+File: Test\README.TXT
+Size: 1231 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: Test\TEST0C.DEB
+Size: 62 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Test\TEST0C1.DEB
+Size: 60 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Test\TEST0D.DEB
+Size: 56 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Test\TEST10.DEB
+Size: 291 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Test\TEST11.DEB
+Size: 228 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Test\TESTDMA.ASM
+Size: 1433 bytes
+Description: --- test FD read in UMB --- using Int 25h
+--------------------------------------------------------------------------------
+File: Test\TESTDMA.c
+Size: 2631 bytes
+Description: testdma.asm - --- test FD read in UMB --- using Int 25h (C17 standard) Architectural Role: Serves...
+--------------------------------------------------------------------------------
+File: Test\TESTDMA2.ASM
+Size: 1991 bytes
+Description: --- test FD read in UMB --- using Int 13h
+--------------------------------------------------------------------------------
+File: Test\TESTDMA2.c
+Size: 3464 bytes
+Description: testdma2.asm - --- test FD read in UMB --- using Int 13h (C17 standard) Architectural Role: Serve...
+--------------------------------------------------------------------------------
+File: Test\TESTDMA3.ASM
+Size: 3194 bytes
+Description: --- test FD read in UMB --- using Int 13h --- this variant ensures that a 64kb border is crossed, --- forcing the EMM...
+--------------------------------------------------------------------------------
+File: Test\TESTDMA3.c
+Size: 5004 bytes
+Description: testdma3.asm - --- test FD read in UMB --- using Int 13h --- this variant ensures that a 64kb bor...
+--------------------------------------------------------------------------------
+File: Test\TESTVCPI.ASM
+Size: 11215 bytes
+Description: --- the purpose of the test is to see if page table 0, returned by int 67h, ax=DE01h --- is updated by the VCPI host....
+--------------------------------------------------------------------------------
+File: Test\TESTVCPI.c
+Size: 15981 bytes
+Description: testvcpi.asm - --- the purpose of the test is to see if page table 0, returned by int 67h, ax=DE0...
+--------------------------------------------------------------------------------
+File: Test\TESTVDS.ASM
+Size: 13634 bytes
+Description: --- VDS API test --- 8103/8104: lock/unlock region --- 8107/8108/8109/810A: request/release DMA buffer, copy into/out...
+--------------------------------------------------------------------------------
+File: Test\TESTVDS.c
+Size: 18561 bytes
+Description: testvds.asm - --- VDS API test --- 8103/8104: lock/unlock region --- 8107/8108/8109/810A: request...
+--------------------------------------------------------------------------------
+File: Test\TESTVDS2.ASM
+Size: 1609 bytes
+Description: --- VDS API test; test disable/enable auto DMA translation (810B/810C)
+--------------------------------------------------------------------------------
+File: Test\TESTVDS2.c
+Size: 2854 bytes
+Description: testvds2.asm - --- VDS API test; test disable/enable auto DMA translation (810B/810C) (C17 standa...
+--------------------------------------------------------------------------------
+File: Test\TESTVDS3.ASM
+Size: 1309 bytes
+Description: --- VDS API test; display ISA DMA translation status for channels 0-7
+--------------------------------------------------------------------------------
+File: Test\TESTVDS3.c
+Size: 2448 bytes
+Description: testvds3.asm - --- VDS API test; display ISA DMA translation status for channels 0-7 (C17 standar...
+--------------------------------------------------------------------------------
+File: Test\VCPI.h
+Size: 1857 bytes
+Description: vcpi.inc - Interface mapping for VCPI.INC (C17 standard) Architectural Role: Serves as the C coun...
+--------------------------------------------------------------------------------
+File: Test\VCPI.INC
+Size: 976 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Test\XMSTEST.ASM
+Size: 4366 bytes
+Description: --- XMSTEST: test xms memory moves --- Public Domain. --- to be assembled with JWasm or Masm v6.
+--------------------------------------------------------------------------------
+File: Test\XMSTEST.c
+Size: 6547 bytes
+Description: xmstest.asm - --- XMSTEST: test xms memory moves --- Public Domain. --- to be assembled with JWas...
+--------------------------------------------------------------------------------
+File: Test\XMSTEST2.ASM
+Size: 3441 bytes
+Description: --- XMSTEST2: test max block allocation --- Public Domain. --- to be assembled with JWasm or Masm v6.
+--------------------------------------------------------------------------------
+File: Test\XMSTEST2.c
+Size: 5461 bytes
+Description: xmstest2.asm - --- XMSTEST2: test max block allocation --- Public Domain. --- to be assembled wit...
+--------------------------------------------------------------------------------
+File: Test\XMSTEST3.ASM
+Size: 2228 bytes
+Description: --- test ah=0Eh (get handle info) --- Public Domain. --- to be assembled with JWasm or Masm v6.
+--------------------------------------------------------------------------------
+File: Test\XMSTEST3.c
+Size: 3711 bytes
+Description: xmstest3.asm - --- test ah=0Eh (get handle info) --- Public Domain. --- to be assembled with JWas...
+--------------------------------------------------------------------------------
+File: Test\XMSTEST4.ASM
+Size: 2619 bytes
+Description: --- XMSTEST4: test block resize (shrink) --- Public Domain. --- to be assembled with JWasm or Masm v6.
+--------------------------------------------------------------------------------
+File: Test\XMSTEST4.c
+Size: 4416 bytes
+Description: xmstest4.asm - --- XMSTEST4: test block resize (shrink) --- Public Domain. --- to be assembled wi...
+--------------------------------------------------------------------------------
+File: Test\XMSTEST5.ASM
+Size: 3111 bytes
+Description: --- XMSTEST5: test block resize (shrink) --- this variant allocates a 64MB block with xms v3, --- but tries to resize...
+--------------------------------------------------------------------------------
+File: Test\XMSTEST5.c
+Size: 5009 bytes
+Description: xmstest5.asm - --- XMSTEST5: test block resize (shrink) --- this variant allocates a 64MB block w...
+--------------------------------------------------------------------------------
+File: Tools\CLEAR.BAT
+Size: 407 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\CPUID\CPUID.ASM
+Size: 8170 bytes
+Description: --- CPUID displays status of CPU. --- Public Domain. --- Masm syntax. To be assembled with JWasm or Masm. --- uses 16...
+--------------------------------------------------------------------------------
+File: Tools\CPUID\CPUID.c
+Size: 10576 bytes
+Description: cpuid.asm - --- CPUID displays status of CPU. --- Public Domain. --- Masm syntax. To be assembled...
+--------------------------------------------------------------------------------
+File: Tools\CPUID\MAKE.BAT
+Size: 85 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\CPUID\PRINTF.h
+Size: 5285 bytes
+Description: printf.inc - --- simple printf() implementation (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: Tools\CPUID\PRINTF.INC
+Size: 2881 bytes
+Description: --- simple printf() implementation
+--------------------------------------------------------------------------------
+File: Tools\Cpustat\CPUSTAT.ASM
+Size: 18364 bytes
+Description: --- CPUSTAT displays status of CPU. --- Public Domain. --- Masm syntax. To be assembled with JWasm or Masm. --- uses ...
+--------------------------------------------------------------------------------
+File: Tools\Cpustat\CPUSTAT.c
+Size: 27363 bytes
+Description: cpustat.asm - --- CPUSTAT displays status of CPU. --- Public Domain. --- Masm syntax. To be assem...
+--------------------------------------------------------------------------------
+File: Tools\Cpustat\MAKE.BAT
+Size: 89 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\Cpustat\PRINTF.h
+Size: 5285 bytes
+Description: printf.inc - --- simple printf() implementation (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: Tools\Cpustat\PRINTF.INC
+Size: 2881 bytes
+Description: --- simple printf() implementation
+--------------------------------------------------------------------------------
+File: Tools\EMSSTAT\EMSSTAT.ASM
+Size: 12251 bytes
+Description: --- EMSSTAT: display EMS status. --- Public Domain. --- tools: JWasm/Masm v6 and WLink.
+--------------------------------------------------------------------------------
+File: Tools\EMSSTAT\EMSSTAT.c
+Size: 18164 bytes
+Description: emsstat.asm - --- EMSSTAT: display EMS status. --- Public Domain. --- tools: JWasm/Masm v6 and WL...
+--------------------------------------------------------------------------------
+File: Tools\EMSSTAT\MAKE.BAT
+Size: 81 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\EMSSTAT\PRINTF.h
+Size: 5285 bytes
+Description: printf.inc - --- simple printf() implementation (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: Tools\EMSSTAT\PRINTF.INC
+Size: 2881 bytes
+Description: --- simple printf() implementation
+--------------------------------------------------------------------------------
+File: Tools\JEMFBHLP\JEMFBHLP.ASM
+Size: 2752 bytes
+Description: *** save some interrupt vectors the way MS-DOS does *** needed for FreeDOS if Jemm386's FASTBOOT option is used
+--------------------------------------------------------------------------------
+File: Tools\JEMFBHLP\JEMFBHLP.c
+Size: 4420 bytes
+Description: jemfbhlp.asm - save some interrupt vectors the way MS-DOS does needed for FreeDOS if Jemm386's FA...
+--------------------------------------------------------------------------------
+File: Tools\JEMFBHLP\MAKE.BAT
+Size: 86 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\DEBUG.h
+Size: 1755 bytes
+Description: debug.inc - debug macros and equates (C17 standard) Architectural Role: Serves as the C counterpa...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\DEBUG.INC
+Size: 981 bytes
+Description: *** debug macros and equates
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\DPRINTF.h
+Size: 5036 bytes
+Description: dprintf.inc - --- printf for debug displays, 32-bit --- i64toa(long long n, char s, int base); --...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\DPRINTF.INC
+Size: 2850 bytes
+Description: --- printf for debug displays, 32-bit --- i64toa(long long n, char * s, int base); --- convert 64-bit long long to st...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\DPRNTF16.h
+Size: 5280 bytes
+Description: dprntf16.inc - --- printf for debug displays, 16-bit --- itoa(long n, char s, int base); --- conv...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\DPRNTF16.INC
+Size: 2957 bytes
+Description: --- printf for debug displays, 16-bit --- itoa(long n, char * s, int base); --- convert 32-bit long to string
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\History.txt
+Size: 2026 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD.ASM
+Size: 24790 bytes
+Description: --- 16-bit part of JLoad --- JLoad loads a 32bit PE binary in Jemm's address space --- best viewed with TABSIZE 4 ---...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD.c
+Size: 28520 bytes
+Description: jload.asm - --- 16-bit part of JLoad --- JLoad loads a 32bit PE binary in Jemm's address space --...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD.h
+Size: 1333 bytes
+Description: jload.inc - --- assembly conditionals (C17 standard) Architectural Role: Serves as the C counterp...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD.INC
+Size: 659 bytes
+Description: --- assembly conditionals
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD.txt
+Size: 4246 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD32.ASM
+Size: 11032 bytes
+Description: --- JLoad's PE file loader --- this code is copied to linear address ?SYSTEMADDR when --- JLoad is running for the fi...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD32.c
+Size: 14808 bytes
+Description: jload32.asm - --- JLoad's PE file loader --- this code is copied to linear address ?SYSTEMADDR wh...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD32.h
+Size: 1422 bytes
+Description: jload32.inc - --- macros (C17 standard) Architectural Role: Serves as the C counterpart header re...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\JLOAD32.INC
+Size: 702 bytes
+Description: --- macros
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\license.txt
+Size: 1090 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\MAKEFILE
+Size: 3017 bytes
+Description: Build compilation Makefile configuration.
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\VDMAD.ASM
+Size: 5264 bytes
+Description: --- VDMAD support --- best viewed with TAB size 4
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\VDMAD.c
+Size: 6728 bytes
+Description: vdmad.asm - --- VDMAD support --- best viewed with TAB size 4 (C17 standard) Architectural Role: ...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\VIOOUT.h
+Size: 2961 bytes
+Description: vioout.inc - --- low-level video access --- no assumption about ds,es. --- ss is supposed to be f...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\VIOOUT.INC
+Size: 1524 bytes
+Description: --- low-level video access --- no assumption about ds,es. --- ss is supposed to be flat.
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\VMM.ASM
+Size: 38149 bytes
+Description: --- VMM functions --- best viewed with TAB size 4
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\VMM.c
+Size: 48765 bytes
+Description: vmm.asm - --- VMM functions --- best viewed with TAB size 4 (C17 standard) Architectural Role: Se...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\WINNT.h
+Size: 20014 bytes
+Description: winnt.inc - Interface mapping for WINNT.INC (C17 standard) Architectural Role: Serves as the C co...
+--------------------------------------------------------------------------------
+File: Tools\JLOAD\WINNT.INC
+Size: 19655 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Tools\MAKE.BAT
+Size: 307 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\MEMSTAT\MAKE.BAT
+Size: 85 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\MEMSTAT\MEMSTAT.ASM
+Size: 6379 bytes
+Description: *** get extended memory status using int 15h *** AH=88h *** AH=C7h if supported *** AX=E801h *** AX=E820h
+--------------------------------------------------------------------------------
+File: Tools\MEMSTAT\MEMSTAT.c
+Size: 9318 bytes
+Description: memstat.asm - get extended memory status using int 15h AH=88h AH=C7h if supported AX=E801h AX=E82...
+--------------------------------------------------------------------------------
+File: Tools\MEMSTAT\PRINTF.h
+Size: 5285 bytes
+Description: printf.inc - --- simple printf() implementation (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: Tools\MEMSTAT\PRINTF.INC
+Size: 2881 bytes
+Description: --- simple printf() implementation
+--------------------------------------------------------------------------------
+File: Tools\MoveXBDA\MAKE.BAT
+Size: 83 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\MoveXBDA\MOVEXBDA.ASM
+Size: 4840 bytes
+Description: --- MOVEXBDA moves XBDA to low memory. If the XBDA is already moved --- or if it is too large, nothing is done. --- M...
+--------------------------------------------------------------------------------
+File: Tools\MoveXBDA\MOVEXBDA.c
+Size: 7397 bytes
+Description: movexbda.asm - --- MOVEXBDA moves XBDA to low memory. If the XBDA is already moved --- or if it i...
+--------------------------------------------------------------------------------
+File: Tools\UMBM\MAKE.BAT
+Size: 86 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\UMBM\UMBM.ASM
+Size: 12956 bytes
+Description: *** UMBM is a DOS device driver, but will not install permanently: *** if UMBs activated by UMBPCI are found, UMBM wi...
+--------------------------------------------------------------------------------
+File: Tools\UMBM\UMBM.c
+Size: 19005 bytes
+Description: umbm.asm - UMBM is a DOS device driver, but will not install permanently: if UMBs activated by UM...
+--------------------------------------------------------------------------------
+File: Tools\VCPI\MAKE.BAT
+Size: 80 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\VCPI\PRINTF.h
+Size: 5103 bytes
+Description: printf.inc - --- ltob(long n, char s, int base); --- convert long to string (C17 standard) Archit...
+--------------------------------------------------------------------------------
+File: Tools\VCPI\PRINTF.INC
+Size: 2809 bytes
+Description: --- ltob(long n, char * s, int base); --- convert long to string
+--------------------------------------------------------------------------------
+File: Tools\VCPI\VCPI.ASM
+Size: 18526 bytes
+Description: *** display VCPI information *** and use VCPI to switch to protected mode and back --- if segments are defined BEFORE...
+--------------------------------------------------------------------------------
+File: Tools\VCPI\VCPI.c
+Size: 26727 bytes
+Description: vcpi.asm - display VCPI information and use VCPI to switch to protected mode and back --- if segm...
+--------------------------------------------------------------------------------
+File: Tools\VCPI\VCPI.h
+Size: 1857 bytes
+Description: vcpi.inc - Interface mapping for VCPI.INC (C17 standard) Architectural Role: Serves as the C coun...
+--------------------------------------------------------------------------------
+File: Tools\VCPI\VCPI.INC
+Size: 976 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: Tools\VCPI\VIOOUT.h
+Size: 3548 bytes
+Description: vioout.inc - --- vio output for 16-bit protected-mode (C17 standard) Architectural Role: Serves a...
+--------------------------------------------------------------------------------
+File: Tools\VCPI\VIOOUT.INC
+Size: 1970 bytes
+Description: --- vio output for 16-bit protected-mode
+--------------------------------------------------------------------------------
+File: Tools\XMSSTAT\MAKE.BAT
+Size: 84 bytes
+Description: Command batch script.
+--------------------------------------------------------------------------------
+File: Tools\XMSSTAT\PRINTF.h
+Size: 5285 bytes
+Description: printf.inc - --- simple printf() implementation (C17 standard) Architectural Role: Serves as the ...
+--------------------------------------------------------------------------------
+File: Tools\XMSSTAT\PRINTF.INC
+Size: 2881 bytes
+Description: --- simple printf() implementation
+--------------------------------------------------------------------------------
+File: Tools\XMSSTAT\XMSSTAT.ASM
+Size: 9687 bytes
+Description: --- XMSSTAT: display xms status. --- Public Domain. --- to be assembled with JWasm or Masm v6.
+--------------------------------------------------------------------------------
+File: Tools\XMSSTAT\XMSSTAT.c
+Size: 14517 bytes
+Description: xmsstat.asm - --- XMSSTAT: display xms status. --- Public Domain. --- to be assembled with JWasm ...
+--------------------------------------------------------------------------------
+File: XMS35.txt
+Size: 3033 bytes
+Description: Documentation file.
+--------------------------------------------------------------------------------

@@ -1,0 +1,2860 @@
+/*
+ * jemm32.asm - ***************************************************************************** ** This is the main 32bit ASM part of JEMM. ** ** JEMM contains code of FreeDOS Emm386, which in turn used the source of ** an EMM made public in c't (a german IT magazine) in 08/90, page 214, ** written by Harald Albrecht. ** ** some parts the code which is based on FD Emm386 is copyright protected and ** licensed under the Artistic License version (see LICENSE.TXT for details). ** ** 1. EMS 3.2 functions (file EMS32.INC) ** (c) 1990 c't/Harald Albrecht ** (c) 2001-2004 tom ehlert ** 2. DMA support (file DMA.ASM) ** (c) 1990 c't/Harald Albrecht ** 3. privileged opcode emulation (file EMU.ASM) ** (c) 2001-2004 tom ehlert ** ** The rest of the 32bit source is Public Domain. ** ***************************************************************************** (C17 standard)
+ *
+ * Architectural Role:
+ *   Serves as the C counterpart source representing JEMM32.ASM.
+ *
+ * Changeability & Constraints:
+ *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
+ *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ *
+ * Expected Behavior:
+ *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *
+ * Diagnostics & Recovery:
+ *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ */
+
+// TITLE JEMM - Virtual 8086-Monitor
+// NAME JEMM
+
+// --- to be assembled with JWasm or Masm v6.1+
+
+// .486P
+// .model FLAT
+void PageFaultFF(void)
+{
+    /*
+     * Mapped logic from PageFaultFF in JEMM32.ASM:
+     * PageFaultFF proc
+     * 
+     *     @dprintf ?V86DBG, <"Write access to FF000",10>
+     *     @GETPTEPTR ebx, ?PAGETAB0+0FFh*4, 1
+     *     mov ecx, [ebx]  ;get PTE for FF000
+     *     mov dword ptr [ebx], 0FF000h + 111B ;set the "original" PTE
+     *     mov [dwSavedRomPTE], ecx
+     *     call @@invlpgFF
+     * 
+     *     mov ecx, offset @@pagefaultcont
+     *     mov ax, FLAT_CODE_SEL
+     *     shl eax, 16
+     *     mov ax, cx
+     *     mov cx, 0EE00h
+     * 
+     * if ?SHAREDIDT
+     *     mov ebx, offset V86IDT
+     * else
+     *     mov ebx, dwV86IDT
+     * endif
+     *     xchg eax, [ebx+1*8+0]
+     *     xchg ecx, [ebx+1*8+4]
+     *     mov dword ptr [dqSavedInt01+0], eax
+     *     mov dword ptr [dqSavedInt01+4], ecx
+     *     or byte ptr [ebp].Client_Reg_Struc.Client_EFlags+1, 1  ;TF=1
+     *     @v86popregX             ; return to V86, execute 1 instruction
+     *     ADD ESP,4+4
+     *     iretd
+     * 
+     * ;--- returned to monitor after 1 instruction run in v86 mode
+     * 
+     * @@pagefaultcont:
+     *     pushad
+     *     push ss
+     *     pop ds
+     *     @dprintf ?V86DBG, <"After write access to FF000",10>
+     *     mov ecx, [dwSavedRomPTE]
+     *     @GETPTEPTR eax, ?PAGETAB0+0FFh*4, 1
+     *     mov [eax],ecx
+     *     xor eax, eax
+     *     mov cr2, eax
+     *     mov eax, dword ptr [dqSavedInt01+0]
+     *     mov ecx, dword ptr [dqSavedInt01+4]
+     * if ?SHAREDIDT
+     *     mov ebx, offset V86IDT
+     * else
+     *     mov ebx, dwV86IDT
+     * endif
+     *     mov [ebx+1*8+0], eax
+     *     mov [ebx+1*8+4], ecx
+     *     call @@invlpgFF
+     *     popad
+     *     and byte ptr [esp].IRETDV86._Efl+1,not 1    ;TF=0
+     *     iretd
+     * @@invlpgFF:
+     * if ?INVLPG
+     *     cmp [bNoInvlPg],0
+     *     jnz @@noinvlpg
+     *     invlpg ds:[0FF000h]
+     *     ret
+     * @@noinvlpg:
+     * endif
+     *     mov eax, cr3
+     *     mov cr3, eax
+     *     ret
+     *     align 4
+     * 
+     * PageFaultFF endp
+     */
+}
+
+
+// endif
+
+// --- By setting ?AUXIO one may change this to write to COMx;
+// --- this can be handled in protected-mode.
+
+void PrintString(void)
+{
+    /*
+     * Mapped logic from PrintString in JEMM32.ASM:
+     * PrintString proc
+     *     push esi
+     *     mov esi, [esp+4+4]
+     * nextchar:
+     *     lodsb
+     *     cmp al,0
+     *     jz done
+     *  if ?AUXIO
+     *     call AuxPutChar
+     *  else
+     *   if ?USEINT10
+     *     mov ah,0Eh
+     *     mov word ptr [EBP].Client_Reg_Struc.Client_EAX,ax
+     *     mov word ptr [EBP].Client_Reg_Struc.Client_EBX,0007
+     *     mov eax,10h
+     *     call Exec_Int
+     *   else
+     *     mov byte ptr [EBP].Client_Reg_Struc.Client_EAX,al
+     *     mov eax,29h
+     *     call Exec_Int
+     *   endif
+     *  endif
+     *     jmp nextchar
+     * done:
+     *     pop esi
+     *     ret 4
+     *     align 4
+     * 
+     * PrintString endp
+     */
+}
+
+
+// --- sprintfx - formatted output
+// --- edi -> output buffer
+// --- edx must be preserved!
+
+void sprintfx(void)
+{
+    /*
+     * Mapped logic from sprintfx in JEMM32.ASM:
+     * sprintfx proc
+     *     push esi
+     *     mov esi, [esp+4+4]
+     * @@nextchar:
+     *     lodsb
+     *     and al,al
+     *     jz @@done
+     *     cmp al,'%'
+     *     jz is_fmt
+     *     stosb
+     *     jmp @@nextchar
+     * @@done:
+     * ife ?AUXIO
+     * endif
+     *     pop esi
+     *     ret 4
+     * 
+     * is_fmt:
+     *     push offset @@nextchar
+     *     lodsb
+     *     mov bl,al
+     *     lodsb
+     *     movsx eax, al
+     *     mov eax, ss:[ebp+eax]   ;use SS prefix here!
+     *     cmp bl,2
+     *     jz b2a
+     *     cmp bl,4
+     *     jz w2a
+     *     jmp dw2a
+     * 
+     * sprintfx endp
+     */
+}
+
+
+// --- helper routines
+
+void dw2a(void) // fall through
+{
+    /*
+     * Mapped logic from dw2a in JEMM32.ASM:
+     * dw2a proc            ; display DWORD in eax into EDI
+     *     push eax
+     *     shr eax,16
+     *     call w2a
+     *     pop eax
+     * dw2a endp            ; fall through
+     */
+}
+
+void w2a(void) // fall through
+{
+    /*
+     * Mapped logic from w2a in JEMM32.ASM:
+     * w2a proc            ; display WORD in ax into EDI
+     *     push eax
+     *     mov al,ah
+     *     call b2a
+     *     pop eax
+     * w2a endp            ; fall through
+     */
+}
+
+void b2a(void)
+{
+    /*
+     * Mapped logic from b2a in JEMM32.ASM:
+     * b2a proc            ; display BYTE in al into EDI
+     *     push eax
+     *     shr al,4
+     *     call @@nibout
+     *     pop eax     ; fall through
+     * @@nibout:               ; display NIBBLE in al[0..3] into EDI
+     *     and al,0Fh
+     *     cmp al,10
+     *     sbb al,69H
+     *     das
+     *     stosb
+     *     ret
+     *     align 4
+     * b2a endp
+     */
+}
+
+
+// if ?AUXIO
+#include <auxio.h>
+// endif
+
+// .text$01w segment dword flat public 'CODE'
+
+// --- stack frame for exceptions
+
+// EXCFRAME struct
+// if ?ISRFLGS
+// org -36
+// _isr      dd ?
+// endif
+// org -32
+// _cr2      dd ?
+// _cr0      dd ?
+// _esp      dd ?
+// _ss       dd ?
+// _gs       dd ?
+// _fs       dd ?
+// _es       dd ?
+// _ds       dd ?
+// Client_Reg_Struc <?>
+// EXCFRAME ends
+
+// exc_str label byte
+// DB 13,10, ?NAME
+// db ": exception %",        2, EXCFRAME.Client_Int
+// db " occured at CS:EIP=%", 4, EXCFRAME.Client_CS
+// db ':%',                   8, EXCFRAME.Client_EIP
+// db ", ERRC=%",             8, EXCFRAME.Client_Error
+// db 13,10
+// db "SS:ESP=%",             4, EXCFRAME._ss
+// db ':%',                   8, EXCFRAME._esp
+// db " EBP=%",               8, EXCFRAME.Client_EBP
+// db " EFL=%",               8, EXCFRAME.Client_EFlags
+// DB " CR0=%",               8, EXCFRAME._cr0
+// exc_cr2 label byte
+// DB " CR2=%",               8, EXCFRAME._cr2
+// db 13,10
+// db "EAX=%",                8, EXCFRAME.Client_EAX
+// db " EBX=%",               8, EXCFRAME.Client_EBX
+// db " ECX=%",               8, EXCFRAME.Client_ECX
+// db " EDX=%",               8, EXCFRAME.Client_EDX
+// db " ESI=%",               8, EXCFRAME.Client_ESI
+// db " EDI=%",               8, EXCFRAME.Client_EDI
+// db 13,10
+// db "DS=%",                 4, EXCFRAME._ds
+// db " ES=%",                4, EXCFRAME._es
+// db " FS=%",                4, EXCFRAME._fs
+// db " GS=%",                4, EXCFRAME._gs
+// if ?ISRFLGS
+// db " ISR=%",               4, EXCFRAME._isr
+// endif
+// db ' [CS:IP]='
+// db 0
+// ----------------------------------- byte  word  dword [cs:ip] crlf    %
+#define sizeexcstr ($ - offset exc_str) + 1*2 + 6*4 + 13*8  + 8*3   + 2 - 20*3 + (?ISRFLGS * (4-3))
+
+// exc_str2 db 'Press ESC to abort program, F1/F2 for reboot ', 0
+// exc_str3 db 13, ?NAME, ': unable to continue - press F1/F2 for reboot ', 0
+// szCRLF db CR, LF, 0
+
+// align 4
+
+// .text$01w ends
+
+// --- the monitor entry
+// --- it should not be at the very beginning of this segment
+
+// if ?SELINTLOG
+// logintbm label dword
+// --- selective logs of INTs. default: log INT 0-7 only
+// -------+-------3-------+-------2-------+-------1-------+-------0
+// dq 0000000000000000000000000000000000000000000000000000000011111111b
+// -------+-------7-------+-------6-------+-------5-------+-------4
+// dq 0000000000000000000000000000000000000000000000000000000000000000b
+// dq 0,0
+// endif
+
+// align 4
+
+// if ?FASTMON
+
+// V86_MonitorEx: // v5.86: label needed because the 32 entries won't fit in 128 bytes anymore
+// push dword ptr [esp]
+// jmp short V86_Monitor
+// align 4
+
+// --- v5.86: "fast" entries 0-7 get a fake error code now;
+// ---        thus they are handled as exceptions by the monitor.
+
+// int00 label near
+// INTNO = 0
+// REPT ?FASTENTRIES // 32 "fast" entries
+// push INTNO
+// if INTNO LT 8
+// jmp short V86_MonitorEx
+// else
+// jmp short V86_Monitor
+// endif
+// INTNO = INTNO+1
+// ENDM
+
+// endif // ?FASTMON
+
+// all entries in the IDT (except 15h and 67h) jump to V86_Monitor.
+// It has to check if an exception has occured. If no, just reflect the
+// interrupt to v86-mode. If yes, check what the reason for the exception
+// was and do the appropriate actions.
+// 
+// inp: the cpu has set DS,ES,FS,GS==NULL if switch from v86 mode!
+// [ESP+0] = INT#
+
+// --- stack frame in V86 monitor for IRQs and software INTs
+
+// V86FRAME struct
+// PUSHADS <>
+// dd ?
+// _IntNo  dd ? // note that int# in V86FRAME differs from Client_Int in Client_Reg_Struc!
+// IRETDV86 <>
+// V86FRAME ends
+
+void V86_Monitor(void)
+{
+    /*
+     * Mapped logic from V86_Monitor in JEMM32.ASM:
+     * V86_Monitor PROC public
+     * 
+     * ;--- Three cases must be handled:
+     * 
+     * ;--- case 1: exception (with error code) in V86 mode (08,0A,0B,0C,0D,0E);
+     * ;--- on the stack: IRETDV86, error code, int#
+     * ;--- v5.86: entry code for int 0-7 does now push a "faked" error code!
+     * ;--- so they are now also treated as exceptions.
+     * 
+     *     CMP ESP, ?TOS - (sizeof IRETDV86 + 2*4) ; exception with errcode in v86 mode?
+     *     JZ V86_Exception
+     * 
+     * ;--- case 2: EXC or IRQ (HLT emu, Yield) in v86 monitor; monitor reentered?
+     * 
+     *     CMP ESP, ?TOS - (sizeof IRETDV86 + 1*4)
+     *     JNZ @@Reentered
+     * 
+     * ;--- case 3: normal INT/IRQ (or EXC > 7 without error code)
+     * 
+     *     sub esp, 4      ; v5.85: added ( to make V86FRAME "match" Client_Reg_Struc )
+     *     PUSHAD
+     *     MOV EBP,ESP		; ebp -> Client_Reg_Struc
+     * 
+     * ;if ?V86DBG and ?V86XDBG
+     * ;    @dprintf ?V86DBG, <".">
+     * ;endif
+     * 
+     * ;-- we don't know for sure what size the stack is.
+     * ;-- There might exist other ring0 code which intruded in the
+     * ;-- monitors address context and modified GDT/IDT entries
+     * ;-- But at least they should have established a 32-bit stack or
+     * ;-- at the very least cleared HiWord(ESP) so EBP will point to a
+     * ;-- valid frame.
+     * 
+     *     MOVZX ECX,byte ptr [EBP].V86FRAME._IntNo ;load 1 byte ONLY!
+     * 
+     * if ?V86DBG
+     *   if ?SELINTLOG
+     *     bt cs:[logintbm],ecx
+     *     jnc @F
+     *   endif
+     *     @dprintf ?V86DBG, <"Int in v86-mode, #=%X, CS:EIP=%X:%X EBP=%X",10>, cx, word ptr [ebp].V86FRAME._Cs,[ebp].V86FRAME._Eip, ebp
+     * @@:
+     * endif
+     * 
+     * ;--- v5.85: are there hooks installed?
+     * ;--- prior to v5.85, Jload did install hooks by directly
+     * ;--- modifying the IDT - that was not a very good idea.
+     * 
+     * 	mov edx, cs:[pV86Hooks]
+     * 	cmp edx, 0
+     * 	jz @F
+     * 	cmp dword ptr cs:[edx+4*ecx], 0
+     * 	jz @F
+     * 	mov eax, ss
+     * 	mov ds, eax
+     * 	mov es, eax
+     * 	mov eax, ecx
+     * 	mov ecx, [edx+4*ecx]
+     * 	mov esp,[dwStackCurr]   ;v5.87: don't run on top of stack, it's reserved for client state
+     * 	call [dwHookProc]
+     * 	mov esp,ebp
+     * 	jnc int_handled
+     * 	MOVZX ECX,byte ptr [EBP].V86FRAME._IntNo
+     * @@:
+     * ;--- simulate an int in v86 mode
+     * 
+     *     MOV ESI,[EBP].V86FRAME._Eip
+     *     MOV EDI,[EBP].V86FRAME._Cs
+     *     MOV EDX,[EBP].V86FRAME._Efl
+     *     MOVZX EAX, word ptr [EBP].V86FRAME._Esp ; use LOWORD(ESP) only!
+     *     MOVZX EBX, word ptr [EBP].V86FRAME._Ss
+     *     shl ecx,2
+     *     SHL EBX,4
+     *     sub word ptr [EBP].V86FRAME._Esp, sizeof IRETWS
+     * 
+     * ; copy Interrupt frame down. Use SS, since DS is unset
+     * ;--- v5.87: emulate 16-bit SP correctly in case there's a wrap-around.
+     * 
+     *     sub ax, 2
+     *     MOV SS:[EBX+eax],DX
+     *     sub ax, 2
+     *     MOV SS:[EBX+eax],DI
+     *     sub ax, 2
+     *     MOV SS:[EBX+eax],SI
+     *     MOV EAX,SS:[ECX]            ; route call to vector in real-mode IVT
+     *     AND DH, NOT (1 or 2)        ; Clear IF+TF as it is done in real-mode (RF should also be cleared!)
+     *     MOV word ptr [EBP].V86FRAME._Eip,AX
+     *     SHR EAX, 16
+     *     MOV [EBP].V86FRAME._Cs, EAX
+     *     MOV [EBP].V86FRAME._Efl, EDX
+     * int_handled:
+     *     @v86popreg
+     *     add ESP,4+4         ; skip int#
+     *     IRETD               ; return to v86-mode
+     * 
+     *     align 4
+     * 
+     * ;--- Monitor has been reentered in PL0: IRQ, NMI or exception;
+     * ;--- exceptions without error code will have a faked one here;
+     * ;--- IRQs can only occur thru Yield() and hence will have a known ESP (dwStackR0);
+     * ;--- ESP -> int#, if exc:errorc, IRETDS
+     * ;--- DS,ES=valid selectors (not for NMI)
+     * 
+     * @@Reentered:
+     * 
+     * if ?NMI
+     * ;--- v5.87: handle NMIs in PL0 before anything else
+     * 	cmp dword ptr [esp],2
+     * 	jz handle_nmi_pl0
+     * endif
+     *     PUSHAD
+     * ;--- v5.87: check moved here (was in handle_exception)
+     *     mov eax, ss                 ; check SS size - just in case
+     *     lar eax, eax
+     *     test eax,400000h
+     *     jnz @F
+     *     movzx esp,sp
+     * @@:
+     *     MOV EBP,ESP		; ebp -> Client_Reg_Struc if exception
+     * 
+     * ;--- v5.86: fixed, V86FRAME got another member in v5.85;
+     * ;--- so since IRQs don't push error codes, the -4 displacement is necessary!
+     * ;--- v5.87: don't use V86FRAME struct here, it's confusing.
+     * ;    cmp word ptr [ebp-4].V86FRAME._Cs, FLAT_CODE_SEL
+     *     cmp word ptr [ebp + sizeof PUSHADS + 4].IRETDS._Cs, FLAT_CODE_SEL
+     *     JNZ handle_exception_r0
+     * 
+     * ;--- IRQs in ring 0 will only occur "controlled".
+     * ;--- This simplifies identifying them (Jemm doesn't reprogram the PICs!)
+     * ;--- A ring0 IRQ will have pushed IRETDS, int# and PUSHADS:
+     *     lea eax,[ebp + sizeof PUSHADS + 4 + sizeof IRETDS]
+     *     cmp eax,cs:[dwStackR0]      ;is ESP that of an IRQ caused by calling Yield()?
+     *     jnz handle_exception_r0
+     * 
+     * ;--- it's an IRQ - DS should be set correctly;
+     * ;--- however, EBP cannot be used as Client_Reg_Struc pointer.
+     * 
+     * ;--- v5.86: fixed, V86FRAME._IntNo isn't correct for IRQs!
+     * ;    MOVZX ECX,byte ptr [EBP].V86FRAME._IntNo ;load 1 byte ONLY!
+     *     MOV ECX, [EBP+sizeof PUSHADS]
+     * 
+     * if ?V86DBG
+     *   if ?SELINTLOG
+     *     bt [logintbm],ecx
+     *     jnc @F
+     *   endif
+     *     @dprintf ?V86DBG, <"V86 IRQ in PL0, int=%X ebp=%X, cs:eip=%X:%X, efl=%X",10>, ecx,\
+     *         ebp, word ptr [ebp-4].V86FRAME._Cs, [ebp-4].V86FRAME._Eip, [ebp-4].V86FRAME._Efl
+     * @@:
+     * endif
+     *     push ecx
+     *     call @@runv86
+     *     @v86popreg
+     *     add ESP,4      ;skip int#
+     *     IRETD
+     * 
+     * if ?NMI
+     * 
+     * ;--- v5.87: reworked the NMI code for PL0;
+     * 
+     * handle_nmi_pl0:
+     * 
+     *     add esp, 2*4    ;skip the dword's pushed by NMI entry code
+     *     mov ss:[TmpReg], esp
+     * 
+     * ;--- since an NMI can occur at any time, ESP may be inside the v86 client register region;
+     * ;--- then ESP has to be setup with dwStackCurr.
+     * 
+     *     cmp esp, ?TOS
+     *     jnc @F
+     *     cmp esp, cs:[dwStackCurr]
+     *     cmc
+     *     jnc @F
+     *     mov esp, cs:[dwStackCurr]
+     * @@:
+     *     push ss:[TmpReg]
+     *     pushad
+     *     push ds
+     *     push es
+     *     mov eax, ss
+     *     mov ds, eax
+     *     mov es, eax
+     *     jnc @F
+     * ;--- save IRETD frame
+     *     mov ebp,[esp+2*4+sizeof PUSHADS]  ;get old ESP (=[TmpReg])
+     *     push [ebp].IRETDS._Efl
+     *     push [ebp].IRETDS._Cs
+     *     push [ebp].IRETDS._Eip
+     * @@:
+     *     pushfd  ; C=IRETD frame saved on stack
+     * 
+     * ;--- route NMI to v86-mode;
+     * ;--- save/restore a few client fields;
+     * ;--- clear IF/TF so monitor won't be reentered by an IRQ.
+     * 
+     *     mov ebp, ?TOS - sizeof Client_Reg_Struc
+     *     push [ebp].Client_Reg_Struc.Client_Int
+     *     push [ebp].Client_Reg_Struc.Client_Error
+     *     push [ebp].Client_Reg_Struc.Client_EFlags
+     *     and byte ptr [ebp].Client_Reg_Struc.Client_EFlags+1, not (1 or 2)
+     *     call nmiv86
+     *     pop [ebp].Client_Reg_Struc.Client_EFlags
+     *     pop [ebp].Client_Reg_Struc.Client_Error
+     *     pop [ebp].Client_Reg_Struc.Client_Int
+     * 
+     *     popfd
+     *     jnc @F
+     * ;--- restore IRETD frame
+     *     mov ebp, [esp+sizeof IRETDS+2*4+sizeof PUSHADS]   ;get old ESP
+     *     pop [ebp].IRETDS._Eip
+     *     pop [ebp].IRETDS._Cs
+     *     pop [ebp].IRETDS._Efl
+     * @@:
+     *     @dprintf ?NMIDBG, <"NMI PL0 exit, PL3 CS:IP=%X:%X SS:SP=%X:%X",10>,\
+     *         [ebp].Client_Reg_Struc.Client_CS, [ebp].Client_Reg_Struc.Client_EIP, [ebp].Client_Reg_Struc.Client_SS, [ebp].Client_Reg_Struc.Client_ESP
+     *     pop es
+     *     pop ds
+     * ;--- restore GPRs and ESP
+     *     popad
+     *     pop esp
+     *     iretd
+     * 
+     *     align 4
+     * 
+     * nmiv86::
+     * ;--- NMI must be masked - else the IRETD to enter v86 will re-trigger it...
+     *     mov al,80h
+     *     out 70h,al
+     *     in al,71h
+     * 
+     * ;--- run NMI interrupt in v86; registers eax,ecx,edx may be trashed if called by PL0, but shouldn't matter
+     *     push 2
+     *     call @@runv86
+     * 
+     * ;--- the v86 NMI handler hopefully has reset the NMI request, so let's unmask it...
+     *     mov al,0
+     *     out 70h,al
+     *     in al,71h
+     *     ret
+     * 
+     * endif
+     * 
+     *     align 4
+     * 
+     * @@runv86:
+     * ;--- running v86-mode will reset registers FS & GS to 0!
+     *     mov ebp, ?TOS - sizeof Client_Reg_Struc
+     *     call Begin_Nest_Exec  ;sets CS:IP to RSEG:BPBack, old CS:IP is "pushed" onto stack
+     *     mov eax, [esp+4]
+     *     call Exec_Int         ;runs an INT xx - push current CS:IP & flags; run INT xx
+     *     call End_Nest_Exec    ;simulates a RETF
+     *     ret 4
+     * 
+     *     align 4
+     * 
+     * V86_Monitor ENDP
+     */
+}
+
+
+// --- breakpoint: handle exc 06 in v86-mode
+
+void Int06_V86Entry(void)
+{
+    /*
+     * Mapped logic from Int06_V86Entry in JEMM32.ASM:
+     * Int06_V86Entry proc
+     *     call Simulate_Iret
+     *     mov [ebp].Client_Reg_Struc.Client_Int,6
+     *     jmp handle_exception_ebp
+     *     align 4
+     * Int06_V86Entry endp
+     */
+}
+
+
+// --- handle exceptions (ring 0 protected-mode and v86-mode);
+// --- display current register set;
+// --- if it is caused by external protected-mode code, display REBOOT option
+// --- else jump to v86-mode and try to abort current PSP
+// --- handle_exception_r0: esp & ebp -> PUSHADS + exc# + (faked) errc + IRETDS
+// --- v5.87: reworked a) segment registers and [CS:E/IP] are now always displayed.
+// ---        b) F1/F2 accepted for fastboot/reboot
+// ---        c) Yield() & port 60h access used instead of INT 16h
+// ---        d) sprintfx() for formatted output introduced
+
+void handle_exception(void)
+{
+    /*
+     * Mapped logic from handle_exception in JEMM32.ASM:
+     * handle_exception proc
+     * 
+     * handle_exception_r0::           ; <--- entry exc in ring 0
+     * ;--- v5.87: display for segment registers added
+     * 	push ds
+     * 	push es
+     * 	push fs
+     * 	push gs
+     * 	jmp @F
+     *     align 4
+     * 
+     * handle_exception_ebp::          ; <--- entry exc in v86
+     *     mov esp,ebp
+     * ;--- v5.87: handle segment registers similar to PL0
+     * 	push [ebp].Client_Reg_Struc.Client_DS
+     * 	push [ebp].Client_Reg_Struc.Client_ES
+     * 	push [ebp].Client_Reg_Struc.Client_FS
+     * 	push [ebp].Client_Reg_Struc.Client_GS
+     * 	mov edx,0ffff0h+0ffffh
+     * @@:
+     *     mov ax, FLAT_DATA_SEL
+     *     mov ds, eax
+     *     mov ES, eax
+     *     inc [bReentered]
+     *     cld
+     * 
+     * ;--- if it's an exception in ring0, the Client_Reg_Struc
+     * ;--- may miss all fields beyond Client_Reg_EFlags!
+     * 
+     *     @dprintf ?EXCDBG, <"Exception dump, exception %X at cs:eip=%X:%X",10>, [ebp].Client_Reg_Struc.Client_Int,\
+     *         [ebp].Client_Reg_Struc.Client_CS, [ebp].Client_Reg_Struc.Client_EIP
+     * 
+     *     test byte ptr [ebp].Client_Reg_Struc.Client_EFlags+2,2   ;V86 mode?
+     *     jnz @@isv86
+     *     mov esi, [ebp].Client_Reg_Struc.Client_EIP
+     *     lar eax, [ebp].Client_Reg_Struc.Client_CS
+     *     lsl edx, [ebp].Client_Reg_Struc.Client_CS
+     *     and ah,60h
+     *     jnz @@isring3	; ring3 protected-mode code is not supposed to run in Jemm's context...
+     *     mov ebx, ss
+     *     lea ecx,[ebp + Client_Reg_Struc.Client_ESP] ;in ring 0, esp & ss are also missing
+     *     jmp @@isring0
+     * 
+     * @@isv86:
+     * 
+     * ;--- setup ESI to CS:IP
+     * 
+     *     movzx esi,word ptr [ebp].Client_Reg_Struc.Client_CS
+     *     shl esi,4
+     *     add esi,[ebp].Client_Reg_Struc.Client_EIP
+     * 
+     * @@isring3:
+     *     mov ebx,dword ptr [ebp].Client_Reg_Struc.Client_SS
+     *     MOV ecx,dword ptr [ebp].Client_Reg_Struc.Client_ESP
+     * @@isring0:
+     *     push ebx                     ; ebp-20 == SS
+     *     push ecx                     ; ebp-24 == ESP
+     * 
+     *     mov eax, cr0
+     *     push eax                     ; ebp-28
+     *     mov eax, cr2
+     * if 1 ;v5.80: display cr4 instead of cr2 if no page fault
+     * ;--- CR4 exists only if cpuid is supported
+     * 	cmp [dwFeatures],0
+     * 	jz @F
+     * 	mov exc_cr2 + 3, '2'
+     * 	cmp byte ptr [ebp].Client_Reg_Struc.Client_Int, 0Eh
+     * 	jz @F
+     * 	mov exc_cr2 + 3, '4'
+     * 	@mov_eax_cr4
+     * @@:
+     * endif
+     *     push eax                     ; ebp-32
+     * 
+     * if ?ISRFLGS
+     *     mov al,0Bh      ;irq 8-15 in service?
+     *     out 0A0h,al
+     *     in al,0A0h
+     *     mov ah,al
+     *     mov al,0Bh      ;irq 0-7 in service?
+     *     out 20h,al
+     *     in al,20h
+     *     push eax        ; ebp-36
+     * endif
+     * 
+     * ;--- setup EDI, used as output buffer
+     * 
+     *     sub esp, (sizeexcstr and not 3) + 4
+     *     mov edi,esp
+     * 
+     * ;--- v5.87: sprintfx replaced render_items
+     *     push offset exc_str
+     *     call sprintfx
+     * 
+     * ;--- render up to 8 bytes at cs:eip (=esi);
+     * ;--- edx = segment limit
+     *     mov cl,8
+     * @@nextitem:
+     *     cmp edx, esi
+     *     jb done_cseip
+     * ;--- for page faults, check CR2!
+     * 	cmp byte ptr [ebp].Client_Reg_Struc.Client_Int, 0Eh
+     * 	jnz @F
+     * 	mov eax, cr2
+     * 	cmp eax, esi
+     * 	jz done_cseip
+     * @@:
+     *     lodsb
+     *     call b2a
+     *     mov al,' '
+     *     stosb
+     *     dec cl
+     *     jnz @@nextitem
+     * done_cseip:
+     *     mov eax,0A0Dh
+     *     stosd
+     * 
+     *     mov ebp, ?TOS - sizeof Client_Reg_Struc
+     * 
+     * ;--- reset client's AC flag
+     * ;--- since we use v86-mode for displays now
+     * 
+     *     and byte ptr [ebp].Client_Reg_Struc.Client_EFlags+2,not 4
+     * 
+     * ;--- make sure the first 4 entries in the breakpoint table are valid
+     * ;--- this will make Jemm work even if severe damage has been done to
+     * ;--- the v86 memory.
+     * 
+     *     mov ecx, [bpstart]
+     *     mov dword ptr [ecx], (?BPOPC shl 24) or (?BPOPC shl 16) or (?BPOPC shl 8) or ?BPOPC
+     * 
+     * ;--- display the exception info
+     *     call Begin_Nest_Exec
+     *     push esp
+     *     call PrintString
+     * 
+     *     mov eax,ss
+     *     cmp ax, FLAT_DATA_SEL
+     *     jz @F
+     *     inc [bReentered]
+     *     push ds
+     *     pop ss
+     * @@:
+     *     mov esp, ?TOS - ?STKSIZE
+     *     mov [dwStackCurr],esp    ; reinit ring 0 stack
+     * 
+     * prompt:
+     *     mov eax, offset exc_str2 ; "press ESC ..."
+     *     cmp bReentered, 2
+     *     jb @F
+     *     mov eax, offset exc_str3 ; "press F1/F2 to reboot..."
+     * @@:
+     *     push eax
+     *     call PrintString
+     * @@waitkey:
+     * if ?AUXIO
+     *     call AuxGetChar
+     *     cmp al,1Bh
+     *     jnz @@waitkey
+     * else
+     *     cmp [bReentered],2
+     *     jnc @F
+     *     in al, 21h
+     *     push eax
+     *     mov al, not 1 ;allow PIT timer irq
+     *     out 21h,al
+     *     call Yield
+     *     pop eax
+     *     out 21h,al
+     * @@:
+     *     in al, 64h
+     *     test al, 01h; kbd input buffer full?
+     *     jz @@waitkey
+     *     mov ah, al
+     *     in al, 60h
+     *     test ah, 20h; is it input from PS/2 mouse?
+     *     jnz @@waitkey
+     *     cmp al, 3Bh ; F1?
+     *     jz softboot
+     *     cmp al, 3Ch ; F2?
+     *     jz _Reboot
+     *     cmp [bReentered],2
+     *     jnc @@waitkey
+     *     cmp al, 1   ; ESC?
+     *     jnz @@waitkey
+     * endif
+     *     push offset szCRLF       ;print a CR/LF
+     *     call PrintString
+     *     mov [bReentered],0
+     *     mov word ptr [ebp].Client_Reg_Struc.Client_EAX, 4C7Fh
+     *     mov eax,21h
+     *     call Exec_Int
+     *     mov [bReentered],2
+     *     jmp prompt
+     * softboot:
+     * ;--- _SoftBoot expects to be called by int 15h, ax=4F53 (Ctrl-Alt-Del pressed)
+     * ;--- this has to be emulated.
+     *     mov word ptr [ebp].Client_Reg_Struc.Client_EAX, 4F53h
+     *     or byte ptr [ebp].Client_Reg_Struc.Client_EFlags, 1 ;set carry flag
+     *     or byte ptr ds:[@KB_FLAG],1100b    ; set key status CTRL & ALT
+     *     jmp _SoftBoot
+     *     align 4
+     * 
+     * handle_exception endp
+     */
+}
+
+
+// if ?BPOPC ne 0F4h
+// --- true IDT 06 entry
+void Int06_Entry(void)
+{
+    /*
+     * Mapped logic from Int06_Entry in JEMM32.ASM:
+     * Int06_Entry proc
+     *     push 0              ;exc 06 has no error code, set a dummy one
+     *     push 6
+     *     pushad
+     *     mov ebp, esp        ; ebp -> Client_Reg_Struc
+     *     mov eax, ss         ; might be better to use "mov eax,cs" "add eax,8"
+     *     mov ds, eax
+     *     jmp @@Is_BP
+     *     align 4
+     * Int06_Entry endp
+     */
+}
+
+// endif
+
+// --- exception in V86 mode with error code.
+// --- IDT entry for gate 10h will have pushed a fake error code for float exceptions.
+// --- v5.86: exceptions 0-7 will have pushed a fake error code.
+// --- esp -> int#, error code, IRETDV86
+// --- DS,ES = NULL
+
+void V86_Exception(void)
+{
+    /*
+     * Mapped logic from V86_Exception in JEMM32.ASM:
+     * V86_Exception proc
+     * 
+     *     pushad
+     *     mov ebp, esp
+     * 
+     * ;--- now ebp -> Client_Reg_Struc
+     * 
+     *     mov ecx, [ebp].Client_Reg_Struc.Client_Int
+     * if ?V86DBG
+     * ;--- this happens quite often, so better activate selectively
+     *   if ?SELINTLOG
+     *     bt cs:[logintbm],ecx
+     *     jnc @F
+     *   endif
+     *     @dprintf ?V86DBG, <"exception in v86-mode, #=%X, errc=%X, cs:ip=%X:%X",10>, ecx,
+     *         [ebp].Client_Reg_Struc.Client_Error, word ptr [ebp].Client_Reg_Struc.Client_CS, word ptr [ebp].Client_Reg_Struc.Client_EIP
+     * @@:
+     * endif
+     *     MOV EAX,SS
+     *     MOV DS,EAX
+     * 
+     *     mov esp,[dwStackCurr]
+     * 
+     * if ?NMI
+     *     cmp ecx,2
+     *     jz nmi_pl3
+     * endif
+     * 
+     * ;    @dprintf ?V86DBG, <"V86_Exception, esp=%X, cs:eip=%X:%X",10>, esp,[ebp].Client_Reg_Struc.Client_CS,[ebp].Client_Reg_Struc.Client_EIP
+     * 
+     *     CMP ECX,0DH             ; general protection exception?
+     *     JNZ @@V86_TEST_EXC      ; no, check further
+     * @@Is_BP:
+     * 
+     * ;--- a monitor "bp", used to switch back from v86 to protected-mode?
+     * ;--- EAX=flat selector
+     * 
+     *     MOV ES,EAX
+     *     MOVZX ESI,word ptr [EBP].Client_Reg_Struc.Client_CS
+     *     mov ecx,[EBP].Client_Reg_Struc.Client_EIP
+     *     SHL ESI,4
+     *     ADD ESI,ECX             ; ESI = linear CS:EIP
+     * 
+     * ; check what triggered the GPF. Possible reasons are:
+     * 
+     * ; - "bp" opcode (HLT or ARPL), which then might be:
+     * ;   + a "Breakpoint" if CS:EIP points into the breakpoint table.
+     * ;     call the breakpoint handler proc then.
+     * ;   + other HLTs. Is handled by running HLT in ring 0 inside the monitor.
+     * ; - trapped I/O command. I/O only causes GPF for masked ports.
+     * ;   The DMA, KBC and P92 ports are trapped inside Jemm, but external
+     * ;   modules may take over the whole IO port trapping (JLOAD).
+     * ; - other privileged opcode. Some are emulated (mov CRx, reg ...),
+     * ;   some are not and then are just translated to an int 6, illegal opcode,
+     * ;   which is then reflected to the V86 task!).
+     * ;
+     *     MOV AL,[ESI]                ; check opcode
+     *     cmp AL, ?BPOPC
+     *     jnz @@NoBPOPC               ; breakpoint?
+     *     mov eax, [bpstart]
+     *     sub esi, eax
+     *     jb @@No_BP
+     *     cmp esi, NUMBP
+     *     jae @@No_BP
+     *     call [esi*4+bptable]
+     * exc_exit:
+     *     @v86popregX
+     *     add ESP,4+4         ; skip int# + error code
+     *     IRETD
+     * nmi_pl3:                ; v5.87
+     *     call nmiv86
+     *     jmp exc_exit
+     * 
+     * @@No_BP:
+     * if ?BPOPC ne 0F4h
+     *     jmp V86_Exc0D
+     * endif
+     * @@Is_Hlt:
+     * 
+     *     @dprintf ?HLTDBG, <"True HLT occured at CS:IP=%X:%X",10>, [ebp].Client_Reg_Struc.Client_CS, [ebp].Client_Reg_Struc.Client_EIP
+     * 
+     *     INC [EBP].Client_Reg_Struc.Client_EIP   ; Jump over the HLT instruction
+     * 
+     * ;    mov esp,[dwStackCurr]     ; v5.87: in V86_Exception, register ESP is already setup correctly.
+     * if 0
+     * ;--- doing a HLT with interrupts disabled will freeze the machine
+     * ;--- (or at least wait for a NMI). MS Emm386 does so. Should Jemm as well?
+     *     test byte ptr [ESP].IRETDV86._Efl+1,2
+     *     jz @@run_hlt
+     * endif
+     *     call EnableInts
+     *     STI                         ; give Interrupts free and then wait
+     *     HLT
+     *     CLI
+     *     call DisableInts
+     *     jmp exc_exit
+     * 
+     * ;--- exc 0Dh in v86, no BP
+     * 
+     * @@NoBPOPC:
+     * 
+     * if ?BPOPC ne 0F4h
+     *     CMP AL,0F4H                 ; HLT-
+     *     JZ @@Is_Hlt                 ; command ?
+     * endif
+     * 
+     * if ?SB
+     * ; see if SoundBlaster INT 3 forced to 1ah error code GPF
+     * 
+     *     CMP [EBP].Client_Reg_Struc.Client_Error,1ah
+     *     jne @@notsb
+     *     test [bV86Flags],V86F_SB
+     *     je @@notsb                  ; SB option not turned on
+     *     inc [EBP].Client_Reg_Struc.Client_EIP   ; skip INT 3 opcode
+     *     @v86popregX
+     *     add esp,4+4                 ; discard GPF error code & INT#
+     *     push 3                      ; simulate an INT 3 (no exception!)
+     *     jmp V86_Monitor
+     * @@notsb:
+     * endif
+     * 
+     * if ?EMUDBG
+     *     push eax
+     *     @dprintf ?EMUDBG, <"Opcode %X %X %X caused GPF at %X",10>, byte ptr [esi], byte ptr [esi+1], byte ptr [esi+2], esi
+     *     pop eax
+     * endif
+     * 
+     *     cmp al,0Fh                  ; check if potentially mov <reg>,cr#
+     *     je ExtendedOp               ; ExtendedOp will jmp back to V86_Exc0D if no emulation happened
+     *     mov cl,0
+     *     mov edi, esi
+     *     cmp al,0F3h                 ; REP prefix?
+     *     setz ch
+     *     jnz @F
+     *     inc esi
+     *     mov al,[esi]
+     * @@:
+     *     cmp al,66h                  ; 66 prefix?
+     *     setz ah
+     *     jnz @F
+     *     inc esi
+     *     mov al,[esi]
+     * @@:
+     * 
+     * ;--- to be fixed: at least OUTS may accept a segment prefix (64,65,26,2E,36,3E)!
+     * ;--- and prefix 67h max cause a GPF at least...
+     * 
+     *     cmp al,6Ch
+     *     JB V86_Exc0D
+     *     cmp al,6Fh                  ; string IO (opcodes 6C, 6D, 6E, 6F)?
+     *     JBE @@DoIO_String
+     *     CMP AL,0E4H
+     *     JB V86_Exc0D
+     *     CMP AL,0E7H                 ; IN AL|AX,xx or OUT xx,AL|AX (opcodes E4, E5, E6, E7)?
+     *     JBE @@DoIO_Im
+     *     CMP AL,0ECH
+     *     JB V86_Exc0D
+     *     CMP AL,0EFH                 ; IN/OUT DX (opcodes EC, ED, EE, EF)?
+     *     JBE @@DoIO_DX
+     *     JMP V86_Exc0D
+     * 
+     * ;--- exception (not 0Dh) in V86 mode
+     * ;--- DS=FLAT, ECX=INT#
+     * 
+     * @@V86_TEST_EXC:
+     * 
+     * if ?ROMRO
+     *     cmp ECX, 0Eh
+     *     jnz @@V86_EXC_NOT0D0E
+     *     mov eax, CR2
+     *     shr eax, 12
+     *     cmp eax, 0FFh      ;it is the FF000 page (which is r/o!)
+     *     jz PageFaultFF
+     * 
+     * ;--- unhandled v86-mode exception 0Eh occured
+     * 
+     * @@V86_EXC0E:
+     * 
+     * endif
+     * 
+     * ;*************************************************************
+     * ; unhandled exception in v86-mode.
+     * ;--- this has been modified for v5.86.
+     * ;--- previously, just exceptions with error code were handled here;
+     * ;--- since such exceptions aren't usually handled by v86-code,
+     * ;--- the default behavior was to terminate the application;
+     * ;--- exception was exc 0Dh, which was routed to INT 06 unless V86EXC0D
+     * ;--- option was set.
+     * ;
+     * ;--- now, exc 0,1,3,4,5,6 and 7 are also handled here.
+     * ;--- however, they are all routed to INTs.
+     * 
+     * ; this notifies any hookers about the problem. If noone has hooked
+     * ; v86-int 06, we finally end at the monitor again, display a register
+     * ; dump and then try to terminate the current PSP.
+     * ;*************************************************************
+     * 
+     * ;--- unhandled v86-mode exception xxh occured
+     * ;--- ecx=exc#
+     * 
+     * @@V86_EXC_NOT0D0E:
+     * if ?V86EXC0D  ;option V86EXC0D supported? (should be 1)
+     * 	jmp noexcrtn
+     * endif
+     * 
+     * ;--- unhandled v86-mode exception 0Dh occured.
+     * ;--- the emulated "special register" moves,
+     * ;--- I/O instructions and HLT have been handled here...
+     * ;--- ecx undefined
+     * 
+     * V86_Exc0D::
+     * 
+     * if ?V86EXC0D
+     * 
+     * ;--- V86EXC0D option set? If yes, route the exception to
+     * ;--- v86 int 0Dh instead of int 06h.
+     * 
+     *     test [bV86Flags], V86F_V86EXC0D
+     *     mov eax,0Dh
+     *     jnz v86excrtn
+     * noexcrtn:
+     * endif
+     * ;--- v5.86: call V86 Fault handler.
+     * ;--- they'll either just RET or chain to the default handler (V86_Fault)
+     * 	mov eax,[ebp].Client_Reg_Struc.Client_Int
+     * 	call [vmm_service_table.pV86Faults]
+     * 	jmp v86excrtn2
+     * V86_Fault::
+     * 
+     * ;--- v5.86: route exc 0-7 to INT
+     * 	cmp eax,8
+     * 	jb v86excrtn
+     * 
+     * ;--- if "noone" has hooked v86 int 06 vector, there's
+     * ;--- no need to route v86 exceptions to v86-mode, since
+     * ;--- it just will be thrown back to Jemm. This allows to
+     * ;--- display the true exception number (0C/0D/0E/..)
+     * 
+     * if ?SKIPINT06
+     *     movzx eax,word ptr ds:[6*4+2]
+     *     cmp eax,[dwRSeg]
+     *     jz handle_exception_ebp
+     * endif
+     * 
+     * ;--- simulate invalid opcode interrupt in v86 mode
+     * 
+     *     mov eax,6
+     * v86excrtn:
+     *     call [vmm_service_table.pSimulate_Int]
+     * v86excrtn2:
+     *     @v86popregX
+     *     add ESP,4+4         ; skip error code & "int#"
+     *     IRETD               ; return to virtual 86-Mode
+     * 
+     *     align 4
+     * 
+     * ;***************************************
+     * 
+     * ; IO command has been trapped
+     * 
+     * 
+     * ;--- opcodes 6C-EF (INS, OUTS), in AL
+     * ;--- CH=01 if rep prefix, else 00
+     * ;--- AH=01 if 66h prefix, else 00
+     * 
+     * @@DoIO_String:
+     *     rol ecx,16
+     *     mov cx,word ptr [ebp].Client_Reg_Struc.Client_ES
+     *     test al,2    ;OUTS opcode?
+     *     jz @@isstrin
+     *     mov cx,word ptr [ebp].Client_Reg_Struc.Client_DS
+     * @@isstrin:
+     *     rol ecx,16
+     *     or cl,STRING_IO
+     *     shl ch,6
+     *     or cl,ch   ;set REP bit
+     *     JMP @@DoIO_DX
+     * 
+     * ;--- opcodes E4-E7 (IN AL,XX ; IN AX,XX ; OUT XX, AL ; OUT XX, AX)
+     * 
+     * @@DoIO_Im:
+     *     INC ESI
+     *     MOVZX EDX,BYTE PTR [ESI]              ; get I/O port in DX
+     * 
+     * ;--- entry opcodes EC-EF (IN AL|AX,DX ; OUT DX,AL|AX)
+     * ;--- DX = Client_DX
+     * 
+     * @@DoIO_DX:
+     *     inc esi
+     *     and ah,al   ;if AH still 1, it is DWORD IO
+     *     shl ah,4
+     *     or cl,ah
+     *     shr ah,4
+     *     xor ah,al
+     *     and ah,1
+     *     shl ah,3
+     *     or cl,ah
+     *     and al,2
+     *     shl al,1
+     *     or cl,al
+     * 
+     *     sub esi, edi
+     *     add [ebp].Client_Reg_Struc.Client_EIP, esi
+     *     mov eax, [ebp].Client_Reg_Struc.Client_EAX
+     * 
+     * ;--- now DX, EAX and CL is set for the IO handlers
+     * 
+     *     push ecx
+     * if ?ALT_TRAPHDL
+     * ;--- v5.85: if trap handler has been changed, and port is < 0x100,
+     * ;---        call the alternate handler if it has been set
+     * 	cmp [IO_Trap_Handler], Default_IO_Trap_Handler
+     * 	jz @F
+     * 	cmp dh, 0
+     * 	jnz @F
+     * 	call [Alternate_IO_Traphandler]
+     * 	jc @@io_handled
+     * @@:
+     * endif
+     *     call [IO_Trap_Handler]
+     * @@io_handled:
+     *     pop ecx
+     *     test cl,OUT_INSTR or STRING_IO
+     *     jnz @@isout
+     *     mov [ebp].Client_Reg_Struc.Client_EAX, eax
+     * @@isout:
+     *     @v86popregX
+     *     ADD ESP,4+4
+     *     IRETD
+     * 
+     *     align 4
+     * 
+     * V86_Exception endp
+     */
+}
+
+
+// --- default IO trap handler;
+// --- can handle byte ports only
+// --- will scan portmap for internally trapped ports ( DMA, A20 )
+// --- in:
+// --- CL=flags
+// --- DL=port
+
+void Default_IO_Trap_Handler(void)
+{
+    /*
+     * Mapped logic from Default_IO_Trap_Handler in JEMM32.ASM:
+     * Default_IO_Trap_Handler proc
+     * 
+     * if 0    ;all internal functions handle byte i/o only
+     *     test cl,STRING_IO or DWORD_IO or WORD_IO
+     *     jnz Simulate_IO_trap
+     * endif
+     *     mov esi, offset portmap
+     * @@nextport:
+     *     cmp dl, [esi].IOTRAPENTRY.bStart
+     *     jb @@skipport
+     *     cmp dl, [esi].IOTRAPENTRY.bEnd
+     *     jbe @@portfound
+     * @@skipport:
+     *     add esi,size IOTRAPENTRY
+     *     cmp esi, offset endportmap
+     *     jnz @@nextport
+     *     jmp Simulate_IO
+     * @@portfound:
+     *     jmp dword ptr [esi].IOTRAPENTRY.dwProc
+     *     align 4
+     * 
+     * Default_IO_Trap_Handler endp
+     */
+}
+
+
+// --- Simulate_IO: emulate IN/OUT
+// --- in:
+// --- EBP -> client ptr
+// --- CX = flags
+// --- Hiword(ECX) = segment of src/dst for string IO
+// --- EAX = data (if OUT_INSTR flag is set)
+// --- DX = port
+
+// --- it converts:
+// --- WORD IO -> BYTE IO
+// --- DWORD IO -> WORD IO
+// --- STRING IO -> DWORD/WORD/BYTE IO
+// --- REP STRING IO -> multiple DWORD/WORD/BYTE IO
+
+// --- v5.84: fixed: Simulate_IO did call [IO_Trap_Handler]
+// ---        now it just splits I/O to byte accesses.
+// ---        The new function Simulate_IO_trap() does what Simulate_IO()
+// ---        did prior to v5.84.
+
+void Simulate_IO_trap(void)
+{
+    /*
+     * Mapped logic from Simulate_IO_trap in JEMM32.ASM:
+     * Simulate_IO_trap proc public
+     * 	mov ebx, [IO_Trap_Handler]
+     * 	jmp Simulate_IOex
+     * Simulate_IO_trap endp
+     */
+}
+
+
+void Simulate_IO(void)
+{
+    /*
+     * Mapped logic from Simulate_IO in JEMM32.ASM:
+     * Simulate_IO proc public
+     * 	mov ebx, offset Simulate_IOex
+     * Simulate_IO endp
+     */
+}
+
+
+// IOPROC textequ <[IO_TrapHandler]>
+// IOPROC textequ <ebx>
+// IOPROC  textequ <[ebp].Client_Reg_Struc.Client_res0>
+
+void Simulate_IOex(void)
+{
+    /*
+     * Mapped logic from Simulate_IOex in JEMM32.ASM:
+     * Simulate_IOex proc
+     * 
+     *     mov IOPROC, ebx ;EBX is a volatile register in DMA, cannot be used
+     *     test cl,STRING_IO
+     *     jnz @@isstrio
+     *     push ecx
+     *     movzx ecx,cl
+     * ;    and ecx,1Ch
+     *     and ecx,DWORD_IO or WORD_IO or OUT_INSTR
+     *     mov ecx,[ecx + offset iojmp]
+     *     xchg ecx, [esp]
+     *     ret
+     *     align 4
+     * 
+     * iojmp label dword
+     *     dd @@bin    ;+00
+     *     dd @@bout   ;+04 (OUT_INSTR is 4)
+     *     dd @@win    ;+08 (WORD_IO is 8)
+     *     dd @@wout   ;+0C
+     *     dd @@din    ;+10 (DWORD_IO is 10h
+     *     dd @@dout   ;+14
+     * ;   dd ??       ;+18 either WORD_IO or DWORD_IO are set, never both
+     * ;   dd ??       ;+1C
+     * 
+     * @@bin:
+     *     in al,dx
+     *     ret
+     * @@bout:
+     *     out dx,al
+     *     ret
+     * @@win:
+     *     and cl,not WORD_IO
+     *     push edx
+     *     push ecx
+     *     call IOPROC
+     *     pop ecx
+     *     mov edx,[esp]
+     *     inc edx
+     *     push eax
+     *     call IOPROC
+     *     mov [esp+1],al
+     *     pop eax
+     *     pop edx
+     *     ret
+     * @@wout:
+     *     and cl,not WORD_IO
+     *     push edx
+     *     push ecx
+     *     call IOPROC
+     *     pop ecx
+     *     mov edx,[esp]
+     *     inc edx
+     *     mov al,ah
+     *     call IOPROC
+     *     pop edx
+     *     ret
+     * @@din:
+     *     and cl,not DWORD_IO
+     *     or cl,WORD_IO
+     *     push edx
+     *     push ecx
+     *     call IOPROC
+     *     pop ecx
+     *     mov edx,[esp]
+     *     add edx,2
+     *     push eax
+     *     call IOPROC
+     *     mov [esp+2],ax
+     *     pop eax
+     *     pop edx
+     *     ret
+     * @@dout:
+     *     and cl,not DWORD_IO
+     *     or cl,WORD_IO
+     *     push edx
+     *     push ecx
+     *     call IOPROC
+     *     pop ecx
+     *     pop edx
+     *     add edx,2
+     *     shr eax,16
+     *     jmp IOPROC
+     * 
+     * @@isstrio:
+     *     test cl, REP_IO
+     *     jz @@isnorepio
+     *     and cl, not REP_IO
+     *     jmp @@teststr
+     * @@nextio:
+     *     push ecx
+     *     push edx
+     *     call @@isnorepio
+     *     pop edx
+     *     pop ecx
+     *     dec word ptr [ebp].Client_Reg_Struc.Client_ECX
+     * @@teststr:
+     *     cmp word ptr [ebp].Client_Reg_Struc.Client_ECX,0
+     *     jnz @@nextio
+     *     ret
+     * 
+     * @@isnorepio:
+     *     and cl,not STRING_IO
+     *     push ecx
+     *     movzx ecx, cl
+     * ;    and ecx,1Ch
+     *     and ecx,DWORD_IO or WORD_IO or OUT_INSTR
+     *     mov ecx, [ecx + offset siojmp]
+     *     xchg ecx, [esp]
+     *     ret
+     *     align 4
+     * 
+     * siojmp label dword
+     *     dd @@sbin
+     *     dd @@sbout
+     *     dd @@swin
+     *     dd @@swout
+     *     dd @@sdin
+     *     dd @@sdout
+     * ;   dd ??       ; either WORD_IO or DWORD_IO are set, never both
+     * ;   dd ??
+     * 
+     * @@sbin:
+     *     call @@sxin
+     *     stosb
+     *     add word ptr [ebp].Client_Reg_Struc.Client_EDI,1
+     *     ret
+     * @@swin:
+     *     call @@sxin
+     *     stosw
+     *     add word ptr [ebp].Client_Reg_Struc.Client_EDI,2
+     *     ret
+     * @@sdin:
+     *     call @@sxin
+     *     stosd
+     *     add word ptr [ebp].Client_Reg_Struc.Client_EDI,4
+     *     ret
+     * @@sxin:
+     *     call IOPROC
+     *     rol ecx, 16
+     *     movzx esi,cx
+     *     rol ecx, 16
+     *     shl esi, 4
+     *     movzx edi, word ptr [ebp].Client_Reg_Struc.Client_EDI
+     *     add edi, esi
+     *     ret
+     * 
+     * @@sbout:
+     *     call @@sxout
+     *     lodsb
+     *     add word ptr [ebp].Client_Reg_Struc.Client_ESI,1
+     * 	jmp IOPROC
+     * @@swout:
+     *     call @@sxout
+     *     lodsw
+     *     add word ptr [ebp].Client_Reg_Struc.Client_ESI,2
+     * 	jmp IOPROC
+     * @@sdout:
+     *     call @@sxout
+     *     lodsd
+     *     add word ptr [ebp].Client_Reg_Struc.Client_ESI,4
+     * 	jmp IOPROC
+     * @@sxout:
+     *     rol ecx, 16
+     *     movzx eax,cx
+     *     rol ecx, 16
+     *     shl eax, 4
+     *     movzx esi, word ptr [ebp].Client_Reg_Struc.Client_ESI
+     *     add esi, eax
+     *     ret
+     * 
+     *     align 4
+     * 
+     * Simulate_IOex endp
+     */
+}
+
+
+// if ?EXC10
+
+// --- detect exception 10h. This exception has NO error code.
+// --- With VME enabled, it would be no problem, but since the VME bit
+// --- in CR4 can be cleared by the user or other programs, Jemm cannot
+// --- rely on that. So it checks:
+// --- 1. if NE is set. No -> Int 10h
+// --- 2. if ([CS:IP] != 9B) && ([CS:IP] != D8..DF) -> Int 10h
+// --- 3. check for FP status word bit 7 set:
+// ---   (a. coprocessor available (00000410, bit 1=1))
+// ---   b. FNSTSW AX, check bit 1, if 0 -> Int 10h
+// ---
+// --- Else it is an exception, and a dummy error code of 0 is pushed,
+// --- which will make V86_Monitor recognize it as such.
+// ---
+// --- Jemm doesn't clear the FP status word by a FNINIT, so any FP instruction
+// --- will continue to cause an exception 10h unless it is cleared.
+// --- If the NE bit in CR0 isn't set, an IRQ 13 (interrupt 75h) is launched
+// --- instead of exception 10h.
+
+void Int10_Entry(void)
+{
+    /*
+     * Mapped logic from Int10_Entry in JEMM32.ASM:
+     * Int10_Entry proc public
+     *     push eax
+     *     mov eax,cr0
+     *     test al,20h     ;NE bit set? (usually it is 0)
+     *     jnz maybeexc10
+     * isint10:
+     *     pop eax
+     *     push 10h
+     *     jmp V86_Monitor ;enter monitor as INT 10h
+     * maybeexc10:
+     * ;--- assuming entry from v86-mode!
+     *     movzx eax, word ptr [esp+4].IRETDV86._Cs
+     *     shl eax, 4
+     *     add eax, [esp+4].IRETDV86._Eip
+     *     mov al,cs:[eax]
+     *     cmp al,9Bh      ;WAIT?
+     *     jz @F
+     *     and al,0F8h     ;or a FPU opcode?
+     *     cmp al,0D8h
+     *     jnz isint10     ;no, then it's an Int 10h
+     * @@:
+     *     fnstsw ax
+     *     test al,80h     ;a FPU error pending?
+     *     jz isint10      ;if no, then it's an Int 10h
+     *     pop eax
+     *     push 0          ;push 0 as error code
+     *     push 10h
+     *     jmp V86_Monitor ;enter monitor as EXC 10h
+     *     align 4
+     * Int10_Entry endp
+     */
+}
+
+
+// endif
+
+// --- copy physical memory
+// --- esi=src, edi=dst, ecx=size
+// --- addresses > 10FFFFh are regarded as physical addresses
+// --- used by XMS block moves and Int 15h, ah=87h
+// --- modifies eax, ebx, ecx, edx, esi, edi
+
+// ?MEMBORDER equ 110000h
+#define ?MEMBORDER 100000h
+
+void MoveMemoryPhys(void)
+{
+    /*
+     * Mapped logic from MoveMemoryPhys in JEMM32.ASM:
+     * MoveMemoryPhys proc public
+     * 
+     *     mov eax, ecx
+     * @@extmove_loop:
+     *     mov ecx, eax
+     *     cmp ecx, MAXBLOCKSIZE
+     *     jb @F
+     *     mov ecx, MAXBLOCKSIZE
+     * @@:
+     *     sub eax, ecx
+     *     push eax
+     *     push esi
+     *     push edi
+     *     push ecx
+     * 
+     *     mov edx,[PageMapHeap]
+     *     push edx
+     * 
+     *     push ecx
+     * 
+     * ;--- get no of PTEs involved (max is 16+1)
+     * 
+     *     add ecx,1000h-1 ;round up size to page boundary
+     *     shr ecx,12      ;bytes -> PTEs (10000h -> 10h)
+     *     inc ecx         ;add 1 to account for base not aligned on page boundary
+     *     mov ch, cl
+     * 
+     *     cmp esi, ?MEMBORDER   ;src in real-mode address space?
+     *     jc  @@src_is_shared
+     *     mov eax, esi
+     *     and esi, 0FFFh
+     *     call MapPhysPages
+     * 
+     * if ?PHYSDBG
+     *     push eax
+     *     @dprintf ?PHYSDBG, <"MoveMemoryPhys: %X pages (src) mapped at %X",10>, ch, eax
+     *     pop eax
+     * endif
+     * 
+     *     add esi, eax
+     *     mov cl, ch
+     * @@src_is_shared:
+     *     cmp edi, ?MEMBORDER
+     *     jc  @@dst_is_shared
+     *     mov eax, edi
+     *     and edi, 0FFFh
+     *     call MapPhysPages
+     * if ?PHYSDBG
+     *     push eax
+     *     @dprintf ?PHYSDBG, <"MoveMemoryPhys: %X pages (dst) mapped at %X",10>, ch, eax
+     *     pop eax
+     * endif
+     *     add edi, eax
+     * @@dst_is_shared:
+     * if ?INVLPG
+     *     cmp [bNoInvlPg],0
+     *     jz @@flushdone
+     * endif
+     *     mov eax, cr3
+     *     mov cr3, eax
+     * @@flushdone:
+     *     pop ecx
+     *     mov [PageMapHeap], edx  ;update in case the monitor is reentered
+     *     call MoveMemory
+     *     pop [PageMapHeap]
+     *     pop ecx
+     *     pop edi
+     *     pop esi
+     *     pop eax
+     *     add edi,ecx
+     *     add esi,ecx
+     *     and eax, eax
+     *     jnz @@extmove_loop
+     *     ret
+     *     align 4
+     * 
+     * MoveMemoryPhys endp
+     */
+}
+
+
+#define ?WT 0 // std=0, 1=set WT bit in PTE for mem moves
+
+// if ?WT
+#define ?PA PTF_PRESENT or PTF_RW or PTF_USER or PTF_PWT
+// else
+#define ?PA PTF_PRESENT or PTF_RW or PTF_USER
+// endif
+
+// --- map physical pages in page map heap
+
+void MapPhysPagesEx(void) // fall thru
+{
+    /*
+     * Mapped logic from MapPhysPagesEx in JEMM32.ASM:
+     * MapPhysPagesEx proc public
+     *     mov edx, [PageMapHeap]
+     * MapPhysPagesEx endp     ;fall thru
+     */
+}
+
+
+// --- map physical pages in linear address space
+// --- in:  eax = start of physical region to map
+// ---      edx -> free entry in page map heap
+// ---      cl = no of 4kB pages to map
+// --- out: eax = linear address where the region has been mapped
+// ---      edx -> next free entry in page map heap
+// --- modifies ebx, cl
+
+void MapPhysPages(void)
+{
+    /*
+     * Mapped logic from MapPhysPages in JEMM32.ASM:
+     * MapPhysPages proc public
+     * 
+     *     mov ebx, edx
+     *     sub ebx, ?SYSLINEAR+?PAGETABSYS
+     *     shl ebx, 10
+     *     add ebx, ?SYSBASE
+     *     and ah, 0F0h
+     *     mov al,?PA
+     * if ?INVLPG
+     *     cmp [bNoInvlPg],0
+     *     jz @@setPTEs486
+     * endif
+     * 
+     * @@nextPTE1:
+     *     mov [edx], eax
+     *     add eax, 1000h
+     *     add edx,4
+     *     dec cl
+     *     jnz  @@nextPTE1
+     *     mov eax, ebx
+     *     ret
+     *     align 4
+     * 
+     * if ?INVLPG
+     * @@setPTEs486:
+     *     push ebx
+     * @@nextPTE2:
+     *     mov [edx], eax
+     *     invlpg ds:[ebx]
+     *     add edx,4
+     *     add eax, 1000h
+     *     add ebx, 1000h
+     *     dec cl
+     *     jnz  @@nextPTE2
+     *     pop eax
+     *     ret
+     * endif
+     *     align 4
+     * 
+     * MapPhysPages endp
+     */
+}
+
+
+// if ?XMS35COMPAT
+// --- in: AX:ESI src physical region to map
+// ---     DX:EDI dst physical region to map
+// ---     EBX: ptr into page directory where the 4MB pages will be mapped
+// --- out: EBX=new Heap4M value
+// --- usually 2 4MB pages are set in pagedir, either for src or for dst,
+// --- but function is reentrant and also both src and dst may be sext.
+// --- start of the mapping region is at end of system space F8000000-800000h ( see Heap4MB )
+
+void MapPhysPagesPSE(void)
+{
+    /*
+     * Mapped logic from MapPhysPagesPSE in JEMM32.ASM:
+     * MapPhysPagesPSE proc uses ecx
+     * 
+     *     @dprintf ?I15DBG or ?MAPDBG, <"MapPhysPagesPSE, ax::esi=%X%08X, dx::edi=%X:%08X, ecx=%X",10>,ax,esi,dx,edi,ecx
+     * 	mov ecx, esi
+     * 	cmp ax,0		; src beyond 4GB border?
+     * 	jnz @F
+     * 	cmp ecx,?MEMBORDER
+     * 	jc donesrc
+     * @@:
+     * 	movzx eax,ax
+     * 	shl eax,13
+     * 	and ecx,0FFC00000h
+     * 	or eax, ecx
+     * 	mov al, PTF_PRESENT or PTF_4MB	;page flags for src: present + 4MB page
+     * 	mov ds:[ebx+0],eax
+     * 	add eax, 1 shl 22
+     * 	jnc @F
+     * 	add eax, 1 shl 13
+     * @@:
+     * 	mov ds:[ebx+4], eax
+     * 	and esi,3fffffh
+     * 	mov eax,ebx			; convert PD offset to linear address
+     * 	sub eax,?PAGEDIR
+     * 	shl eax,20
+     * 	add esi,eax
+     * 	.586p
+     * 	invlpg ds:[esi]
+     * 	invlpg ds:[esi+400000h]
+     * 	.386p
+     * 	lea ebx,[ebx-2*4]	; move backward 2*4MB
+     * donesrc:
+     * 	mov ecx, edi
+     * 	cmp dx,0			; dst beyond 4GB border?
+     * 	jnz @F
+     * 	cmp ecx,?MEMBORDER
+     * 	jc donedst
+     * @@:
+     * 	movzx eax,dx
+     * 	shl eax,13
+     * 	and ecx,0FFC00000h
+     * 	or eax, ecx
+     * 	mov al, PTF_PRESENT or PTF_RW or PTF_4MB	;page flags for dst: present + writable + 4MB page
+     * 	mov ds:[ebx+0],eax
+     * 	add eax, 1 shl 22
+     * 	jnc @F
+     * 	add eax, 1 shl 13
+     * @@:
+     * 	mov ds:[ebx+4], eax
+     * 	and edi,3fffffh
+     * 	mov eax,ebx
+     * 	sub eax,?PAGEDIR
+     * 	shl eax,20
+     * 	add edi,eax
+     * 	.586p
+     * 	invlpg ds:[edi]
+     * 	invlpg ds:[edi+400000h]
+     * 	.386p
+     * 	lea ebx,[ebx-2*4]	; move forward 2*4MB
+     * donedst:
+     *     @dprintf ?I15DBG or ?MAPDBG,<"MapPhysPagesPSE, esi=%X, edi=%X",10>, esi, edi
+     * 	ret
+     * 	align 4
+     * MapPhysPagesPSE endp
+     */
+}
+
+
+// --- in: AX:ESI src physical region to map
+// --- in: DX:EDI dst physical region to map
+// --- in: ECX size
+// --- the first region (src or dst) is mapped at F8000000h - (2*400000h + x)
+// --- x is !=0 if both src and dst are sext mem or if jemm has been reentered while the move is running.
+
+void MoveMemoryPhysEx(void)
+{
+    /*
+     * Mapped logic from MoveMemoryPhysEx in JEMM32.ASM:
+     * MoveMemoryPhysEx proc public
+     *     @dprintf ?I15DBG or ?MAPDBG, <"MoveMemoryPhysEx, ax::esi=%X%08X, dx::edi=%X%08X, ecx=%X",10>,ax,esi,dx,edi,ecx
+     * 	.586p
+     * 	mov ebx,cr4
+     * 	bts ebx,4
+     * 	jc move_loop	;set PSE only if it isn't set yet
+     * 	mov cr4,ebx
+     * 	.386p
+     * move_loop:
+     * 	push ecx
+     * 	cmp ecx, 400000h
+     * 	jb @F
+     * 	mov ecx, 400000h
+     * @@:
+     * 	push eax
+     * 	push edx
+     * 	push esi
+     * 	push edi
+     * 	mov ebx,[Heap4MB]
+     * 	push ebx
+     * 	call MapPhysPagesPSE
+     * 	mov [Heap4MB], ebx
+     * 	call MoveMemory
+     * 	pop [Heap4MB]
+     * 	pop edi
+     * 	pop esi
+     * 	pop edx
+     * 	pop eax
+     * 	pop ecx
+     * 	mov ebx, 400000h
+     * 	add edi, ebx
+     * 	adc dx,0
+     * 	add esi, ebx
+     * 	adc ax,0
+     * 	sub ecx, ebx
+     * 	ja move_loop
+     * 	ret
+     * MoveMemoryPhysEx endp
+     */
+}
+
+
+// endif
+
+// --- copy memory block ESI to EDI, size ECX
+// --- allow interrupts during move op
+
+void MoveMemory(void)
+{
+    /*
+     * Mapped logic from MoveMemory in JEMM32.ASM:
+     * MoveMemory proc public
+     *     mov eax, [ebp].Client_Reg_Struc.Client_EFlags
+     *     test ah,2
+     *     jz @@noenable
+     *     call EnableInts
+     *     sti
+     * @@noenable:
+     * 
+     *     mov al,cl
+     *     shr ecx,2
+     *     and al,3
+     *     REP MOVSD
+     *     mov cl,al
+     *     REP MOVSB
+     * 
+     *     test ah,2
+     *     jz @@nodisable
+     *     cli
+     *     call DisableInts
+     * @@nodisable:
+     *     ret
+     *     align 4
+     * 
+     * MoveMemory endp
+     */
+}
+
+
+// --- allow interrupts in the monitor
+
+void EnableInts(void)
+{
+    /*
+     * Mapped logic from EnableInts in JEMM32.ASM:
+     * EnableInts proc public
+     *     push [dwStackR0]
+     *     mov [dwStackR0],esp
+     *     jmp dword ptr [esp+4]
+     *     align 4
+     * EnableInts endp
+     */
+}
+
+
+void DisableInts(void)
+{
+    /*
+     * Mapped logic from DisableInts in JEMM32.ASM:
+     * DisableInts proc public
+     *     pop [esp+4]
+     *     pop [dwStackR0]
+     *     ret
+     *     align 4
+     * DisableInts endp
+     */
+}
+
+
+void Yield(void)
+{
+    /*
+     * Mapped logic from Yield in JEMM32.ASM:
+     * Yield proc public
+     *     test byte ptr [ebp].Client_Reg_Struc.Client_EFlags+1,2
+     *     jz @@noints
+     *     call EnableInts
+     *     sti
+     *     nop            ;interrupts are enabled 1 instruction *after* STI
+     *     cli
+     *     call DisableInts
+     * @@noints:
+     *     ret
+     *     align 4
+     * Yield endp
+     */
+}
+
+
+// --- simulate an RETF in v86-mode
+// --- INP: EBP -> client struct
+// --- modifies EAX,ECX
+
+void Simulate_Far_Ret(void)
+{
+    /*
+     * Mapped logic from Simulate_Far_Ret in JEMM32.ASM:
+     * Simulate_Far_Ret proc public
+     *     MOVZX eax, word ptr [EBP].Client_Reg_Struc.Client_ESP
+     *     MOVZX ecx, word ptr [EBP].Client_Reg_Struc.Client_SS
+     *     SHL ecx, 4
+     *     add ecx, eax
+     *     MOV eax, [ecx].RETFWS._CsIp
+     *     mov word ptr [EBP].Client_Reg_Struc.Client_EIP, ax
+     *     shr eax,16
+     *     mov [EBP].Client_Reg_Struc.Client_CS, eax
+     *     ADD [EBP].Client_Reg_Struc.Client_ESP,sizeof RETFWS  ; if ESP is to increase, adjust it last!
+     *     ret
+     *     align 4
+     * Simulate_Far_Ret endp
+     */
+}
+
+
+// --- simulate a far call in v86-mode
+// --- EBP -> client struct
+// --- cx: new CS -> client_reg_struct.cs
+// --- edx: new IP -> client_reg_struct.eip
+// --- current v86 CS:IP is pushed onto the v86 stack
+// --- modifies EAX, ECX, EDX
+
+void Simulate_Far_Call(void)
+{
+    /*
+     * Mapped logic from Simulate_Far_Call in JEMM32.ASM:
+     * Simulate_Far_Call proc public
+     *     xchg edx, [EBP].Client_Reg_Struc.Client_EIP
+     *     xchg cx, word ptr [EBP].Client_Reg_Struc.Client_CS
+     *     push ecx
+     *     MOVZX ecx, word ptr [EBP].Client_Reg_Struc.Client_SS
+     *     MOVZX eax, word ptr [EBP].Client_Reg_Struc.Client_ESP
+     *     sub ax, sizeof RETFWS
+     *     mov word ptr [EBP].Client_Reg_Struc.Client_ESP, ax   ; if ESP is to decrease, adjust it first!
+     *     shl ecx, 4
+     *     add eax, ecx
+     *     mov [eax].RETFWS._Ip, dx
+     *     pop ecx
+     *     mov [eax].RETFWS._Cs, cx
+     *     ret
+     *     align 4
+     * Simulate_Far_Call endp
+     */
+}
+
+
+// --- simulate an IRET in v86-mode
+// --- INP: EBP -> Client_Reg_Struc
+// --- modifies EAX,ECX,EDX
+
+void Simulate_Iret(void)
+{
+    /*
+     * Mapped logic from Simulate_Iret in JEMM32.ASM:
+     * Simulate_Iret proc public
+     *     MOVZX eax, word ptr [EBP].Client_Reg_Struc.Client_ESP
+     *     MOVZX ecx, word ptr [EBP].Client_Reg_Struc.Client_SS
+     *     SHL ecx, 4
+     *     add eax, ecx
+     *     MOV edx, [eax].IRETWS._CsIp
+     *     MOV cx, [eax].IRETWS._Fl
+     *     mov word ptr [EBP].Client_Reg_Struc.Client_EIP, dx
+     *     shr edx,16
+     *     mov [EBP].Client_Reg_Struc.Client_CS, edx
+     * if 1
+     *     or ch, V86IOPL shl 4  ;to be safe, set IOPL=3 for v86
+     * endif
+     *     mov word ptr [EBP].Client_Reg_Struc.Client_EFlags, cx
+     *     ADD [EBP].Client_Reg_Struc.Client_ESP,sizeof IRETWS   ; if ESP is to increase, adjust it last!
+     *     ret
+     *     align 4
+     * Simulate_Iret endp
+     */
+}
+
+
+// --- simulate an V86 Int
+// --- INP: EBP -> Client_Reg_Struc
+// --- INP: EAX == INT #
+// --- modifies EAX, ECX, EDX
+
+void Simulate_Int(void)
+{
+    /*
+     * Mapped logic from Simulate_Int in JEMM32.ASM:
+     * Simulate_Int proc
+     * 
+     * ;--- v5.86: check if a v86hook is installed and call it first
+     * 	mov edx, [pV86Hooks]
+     * 	cmp edx, 0
+     * 	jz @F
+     * 	mov ecx, [edx+4*eax]
+     * 	jecxz @F
+     * 	call [dwHookProc]   ;expects: eax=int#, ecx=hookproc, ebp->client regs
+     * 	jnc int_handled
+     * @@:
+     *     mov edx,[eax*4]
+     *     movzx eax,word ptr [EBP].Client_Reg_Struc.Client_ESP
+     *     MOVZX ECX,word ptr [EBP].Client_Reg_Struc.Client_SS   ; get address of v86 SS:SP
+     *     SUB AX, sizeof IRETWS
+     *     SHL ECX,4
+     *     ADD ECX, EAX
+     *     MOV [EBP].Client_Reg_Struc.Client_ESP,eax   ; if ESP is to decrease, adjust it first!
+     * 
+     *     MOV EAX,[EBP].Client_Reg_Struc.Client_CS    ; get v86 CS:IP into EAX
+     *     shl EAX, 16
+     *     MOV AX,word ptr [EBP].Client_Reg_Struc.Client_EIP
+     *     MOV [ECX].IRETWS._CsIp,EAX                  ; set CS:IP on the stack frame
+     * 
+     *     MOV word ptr [EBP].Client_Reg_Struc.Client_EIP,DX   ;found in IVT
+     *     SHR EDX,16
+     *     MOV [EBP].Client_Reg_Struc.Client_CS,EDX
+     * 
+     *     MOV EAX,[EBP].Client_Reg_Struc.Client_EFlags; + v86 Flags
+     *     MOV [ECX].IRETWS._Fl,AX     ; and store them onto v86 stack
+     *     and AH,not (1+2)            ; clear TF+IF; what about RF?
+     *     mov [EBP].Client_Reg_Struc.Client_EFlags,eax
+     * int_handled:
+     *     ret
+     *     align 4
+     * Simulate_Int endp
+     */
+}
+
+
+// --- prepare for nested execution.
+// --- store current v86 cs:ip onto the v86 stack, and
+// --- set current v86 cs:ip to the "back" bp.
+// --- modifies EAX,ECX,EDX
+
+void Begin_Nest_Exec(void)
+{
+    /*
+     * Mapped logic from Begin_Nest_Exec in JEMM32.ASM:
+     * Begin_Nest_Exec proc public
+     *     mov ecx,[dwRSeg]
+     *     movzx edx, [bBpBack]
+     *     jmp Simulate_Far_Call
+     *     align 4
+     * 
+     * Begin_Nest_Exec endp
+     */
+}
+
+
+// --- pop the "back" bp from the client's stack
+
+void End_Nest_Exec(void)
+{
+    /*
+     * Mapped logic from End_Nest_Exec in JEMM32.ASM:
+     * End_Nest_Exec proc public
+     *     call Simulate_Far_Ret
+     *     ret
+     *     align 4
+     * 
+     * End_Nest_Exec endp
+     */
+}
+
+
+// --- exec a v86 int immediately
+// --- EBP -> Client_Reg_Struc
+// --- EAX = INT# to execute
+
+void Exec_Int(void) // fall through
+{
+    /*
+     * Mapped logic from Exec_Int in JEMM32.ASM:
+     * Exec_Int proc
+     * 
+     *     call [vmm_service_table.pSimulate_Int]
+     * 
+     * Exec_Int endp   ;fall through
+     */
+}
+
+
+// --- Resume_Exec actually runs the v86 code
+
+void Resume_Exec(void)
+{
+    /*
+     * Mapped logic from Resume_Exec in JEMM32.ASM:
+     * Resume_Exec proc public
+     *     push [dwStackCurr]
+     *     pushad              ; save PL0 GPRs
+     *     mov [dwStackCurr],esp
+     *     @v86popregX         ; load ESP with EBP and restore v86 GPRs
+     *     add ESP,4+4         ; skip call return + error code
+     *     IRETD               ; and jump to v86 mode
+     *     align 4
+     * Resume_Exec endp
+     */
+}
+
+
+// --- this breakpoint is used to continue execution in protected-mode in a
+// --- nested execution block after Resume_Exec
+
+void V86_Back(void)
+{
+    /*
+     * Mapped logic from V86_Back in JEMM32.ASM:
+     * V86_Back proc
+     *     add esp,4   ;skip return address
+     *     popad
+     *     pop     [dwStackCurr]
+     *     ret
+     *     align 4
+     * 
+     * V86_Back endp
+     */
+}
+
+
+// --- save client's state to EDI
+
+void Save_Client_State(void)
+{
+    /*
+     * Mapped logic from Save_Client_State in JEMM32.ASM:
+     * Save_Client_State proc
+     *     push esi
+     *     push edi
+     *     mov ecx,size Client_Reg_Struc/4
+     *     mov esi, ebp
+     *     rep movsd
+     *     pop edi
+     *     pop esi
+     *     ret
+     *     align 4
+     * Save_Client_State endp
+     */
+}
+
+
+// --- restore client's state from ESI
+
+void Restore_Client_State(void)
+{
+    /*
+     * Mapped logic from Restore_Client_State in JEMM32.ASM:
+     * Restore_Client_State proc
+     *     push esi
+     *     push edi
+     *     mov ecx,size Client_Reg_Struc/4
+     *     mov edi, ebp
+     *     rep movsd
+     *     pop edi
+     *     pop esi
+     *     ret
+     *     align 4
+     * Restore_Client_State endp
+     */
+}
+
+
+// if ?VME
+// --- set/reset the VME flag in CR4 if supported
+// --- INP: AL[0] new state of flag
+
+void SetVME(void)
+{
+    /*
+     * Mapped logic from SetVME in JEMM32.ASM:
+     * SetVME proc public
+     *     test byte ptr [dwFeatures], 2        ;VME supported?
+     *     jz @@novme
+     *     @mov_ecx_cr4
+     *     and al,1
+     *     and cl,not 1
+     *     or cl,al
+     *     @mov_cr4_ecx
+     * @@novme:
+     *     ret
+     *     align 4
+     * SetVME endp
+     */
+}
+
+
+// endif
+
+// if ?I41SUPP
+void Int41_Entry(void)
+{
+    /*
+     * Mapped logic from Int41_Entry in JEMM32.ASM:
+     * Int41_Entry proc public
+     *     iretd           ; just don't route it to v86-mode
+     *     align 4
+     * Int41_Entry endp
+     */
+}
+
+// endif
+
+// --- Int 15h handler
+// --- to detect Ctrl-Alt-Del.
+// --- it also hooks the BIOS A20 functions
+// 
+void Int15_Entry(void)
+{
+    /*
+     * Mapped logic from Int15_Entry in JEMM32.ASM:
+     * Int15_Entry PROC public
+     * 
+     * ;--- probably good to check if coming from v86-mode?
+     * 
+     *     cmp ax,4F53h    ;DEL pressed?
+     *     jz @@isdel
+     * ife ?HOOK13
+     *     cmp ax,9101h    ;diskette interrupt done?
+     *     jz @@isfdirq
+     * endif
+     * if ?A20PORTS
+     *     cmp ah,24h      ;A20?
+     *     jz @@isa20
+     * endif
+     * @@v86mon:
+     *     push 15h
+     *     JMP V86_Monitor ;route interrupt to v86
+     * 
+     * if ?A20PORTS
+     * 
+     * ;--- catch int 15h, ax=2400h and ax=2401h
+     * 
+     * @@isa20:
+     *     cmp al,2
+     *     jnb @@v86mon
+     *     @dprintf ?A20DBG, <"Int 15h, ax=%X called",10>, ax
+     *  if 0
+     *     call A20_Set ;al=0|1
+     *     mov ah,0
+     *     and [esp].IRETDV86._Efl, not 1
+     *  else
+     *     mov ah,86h
+     *     or [esp].IRETDV86._Efl, 1
+     *  endif
+     *     iretd
+     * endif
+     * 
+     * @@isdel:
+     *     PUSH EAX
+     *     MOV AL,CS:[@KB_FLAG]    ; Have the keys CTRL & ALT
+     *     AND AL,1100B            ; been pressed ?
+     *     CMP AL,1100B            ; If not,  continue working
+     *     POP EAX
+     *     JNZ @@v86mon
+     *     sub esp, 2*4            ; room for "error code" and "int#"
+     *     PUSHAD
+     *     MOV EBP,ESP             ; ebp -> Client_Reg_Struc
+     * 
+     *     push ss
+     *     pop ds
+     *     push ss
+     *     pop es
+     * _SoftBoot::
+     *     mov esp,[dwStackCurr]
+     *     cld
+     *     call Begin_Nest_Exec
+     *     mov eax,15h             ; call the v86 int15 hookers
+     *     call Exec_Int
+     * ;   call End_Nest_Exec       ; not needed
+     * ;--- possibly one should check if the carry flag has been cleared
+     * ;--- by one of the hookers. Then reboot should NOT be done.
+     * 
+     * if 1
+     * ;--- v5.75: int 15h, ah=4Fh usually is called during an IRQ. Is the PIC
+     * ;---        waiting for an EOI? Has the keyboard been disabled?
+     *     and word ptr ds:[@KB_FLAG],not 01100001100b ;reset Ctrl+Alt status
+     *     and byte ptr ds:[496h],not 1111b            ;reset Ctrl,Alt,E0,E1 status
+     *     mov al,0Bh      ;get ISR of MPIC
+     *     out 20h,al
+     *     in al,20h
+     *     test al,02      ;IRQ 1 happened?
+     *     jz @F
+     *     mov al,20h      ;send EOI to PIC
+     *     out 20h,al
+     * @@:
+     *     XOR ECX,ECX
+     * @@: IN AL,64h       ;wait until kbd buffer is free
+     *     TEST AL,02
+     *     LOOPNZW @B
+     *     MOV AL,0AEh     ;enable keyboard
+     *     OUT 64h,AL
+     * endif
+     * if ?FASTBOOT
+     *     test [bV86Flags], V86F_FASTBOOT
+     *     jnz fastboot
+     * endif
+     *     jmp _Reboot
+     * 
+     * ife ?HOOK13
+     * @@isfdirq:
+     *     btr word ptr ss:[bDiskIrq],0	; copy out of DMA buffer required?
+     *     jnc @@v86mon
+     *     push ss
+     *     pop ds
+     *     push ss
+     *     pop es
+     *     call Dma_CopyBuffer
+     *     jmp @@v86mon
+     * endif
+     * 
+     * Int15_Entry ENDP
+     */
+}
+
+
+// if ?UNLOAD
+
+// --- unload Jemm
+// --- this is invoked by a v86 breakpoint called by Jemm16
+// --- EBP must be restored before exiting!
+// --- the functions returns with a RETF to Jemm16, but stays
+// --- in protected mode
+
+void Unload(void)
+{
+    /*
+     * Mapped logic from Unload in JEMM32.ASM:
+     * Unload proc
+     * 
+     *     call Simulate_Far_Ret
+     * 
+     * if ?VME
+     *     mov  al,0
+     *     call SetVME
+     * endif
+     * 
+     * if ?FREEXMS
+     *     call Pool_FreeAllBlocks
+     * endif
+     * 
+     *     @dprintf ?UNLDBG, <"Unload: v86CS:EIP=%X:%X, v86SS:ESP=%X:%X",10>,\
+     *         [ebp].Client_Reg_Struc.Client_CS, [ebp].Client_Reg_Struc.Client_EIP,\
+     *         [ebp].Client_Reg_Struc.Client_SS, [ebp].Client_Reg_Struc.Client_ESP
+     * 
+     * ;--- set base of REAL_CODE_SEL and REAL_DATA_SEL
+     * ;--- to the current v86 CS/SS
+     * 
+     *     mov ebx,offset V86GDT
+     *     movzx eax, word ptr [ebp].Client_Reg_Struc.Client_CS
+     *     shl eax, 4
+     *     mov word ptr [ebx + REAL_CODE_SEL+2], ax
+     *     shr eax, 16
+     *     mov byte ptr [ebx + REAL_CODE_SEL+4], al
+     *     movzx eax, word ptr [ebp].Client_Reg_Struc.Client_SS
+     *     shl eax, 4
+     *     mov word ptr [ebx + REAL_DATA_SEL+2], ax
+     *     shr eax, 16
+     *     mov byte ptr [ebx + REAL_DATA_SEL+4], al
+     * 
+     * ;--- restore v86 interrupt vectors
+     * 
+     *     mov eax, [OldInt06]
+     *     mov ds:[06h*4],eax
+     *     mov eax, [OldInt19]
+     *     mov ds:[19h*4],eax
+     * if ?VDS
+     *     call VDS_Exit
+     * endif
+     *     mov eax, [OldInt67]
+     *     mov ds:[67h*4],eax
+     * 
+     *     mov edx, [ebp].Client_Reg_Struc.Client_EIP
+     *     mov ecx, [ebp].Client_Reg_Struc.Client_ESP
+     *     mov ebp, [ebp].Client_Reg_Struc.Client_EBP
+     * ife ?INTEGRATED
+     *     mov bx, [XMSCtrlHandle]
+     * else
+     *     mov bl, [A20Index]
+     * endif
+     * if 0                        ; now done by Jemm16::UnloadJemm
+     *     push 0
+     *     push word ptr 3FFh
+     *     LIDT FWORD ptr [esp]    ; reset IDT to real-mode
+     * endif
+     *     MOV AX,REAL_DATA_SEL    ; before returning, set the
+     *     MOV DS,EAX              ; segment register caches
+     *     MOV ES,EAX
+     *     MOV FS,EAX
+     *     MOV GS,EAX
+     *     MOV SS,EAX
+     *     mov ESP,ECX
+     * 
+     * ;--- the rest will be done by the 16bit part
+     * 
+     *     push REAL_CODE_SEL
+     *     push edx
+     *     retf
+     * 
+     * Unload endp
+     */
+}
+
+// endif
+
+// if ?FASTBOOT
+
+// --- how is FASTBOOT implemented?
+// --- the important thing is to restore the IVT to the values
+// --- *before* DOS has been installed. This requires:
+// --- a). DOS must hook int 19h and restore the vectors it has modified
+// ---     (vectors which count are 00-1F, 40-5F and 68-77). It must also
+// ---     save vector 15h (which is modified by himem.sys).
+// --- b). the vectors must be saved at 0070:100h
+// ---     msdos saves at least 10,13,15,19,1B.
+// --- c). jemm must be loaded as a device driver, so it is loaded very
+// ---     early before other drivers/tsrs.
+// --- if these requirements are met, Jemm will do with FASTBOOT:
+// --- 1. save int vectors 0-1F, 40-5F, 68-77 (20h+20h+10h = 50h*4=320 bytes)
+// ---    on init.
+// --- 2. on ctrl-alt-del, restore these vectors, save the vector for int 19h
+// ---    which DOS has saved internally at 0070:0100+x and modify it to point
+// ---    to a breakpoint.
+// --- 3. call v86-int 19h. DOS will restore the vectors it has saved.
+// --- 4. Jemm regains control, with DOS already deactivated. Now clear
+// ---    vectors 20-3F, 60-67 and 78-FF, restore int 19h to the value saved
+// ---    previously.
+// --- 5. jump to real-mode and do an int 19h again.
+
+void restorevecs(void)
+{
+    /*
+     * Mapped logic from restorevecs in JEMM32.ASM:
+     * restorevecs proc
+     *     pushad
+     *     xor eax, eax
+     *     mov edi, eax
+     *     mov esi, [pSavedVecs]
+     *     push ds
+     *     pop es
+     *     @dprintf ?RBTDBG, <"restoring vectors 00-1F, 40-5F, 68-77",10>
+     *     mov ecx, 20h
+     *     rep movsd           ;set 00-1F
+     *     add edi, 20h*4
+     *     mov cl, 20h
+     *     rep movsd           ;set 40-5F
+     *     add edi, 8*4
+     *     mov cl, 10h
+     *     rep movsd           ;set 68-77
+     * 
+     * ;--- search the int 19h vector stored at 0070:100h
+     * 
+     *     mov esi,700h+100h
+     *     mov cl,5
+     * @@nextitem:
+     *     lodsb
+     *     mov bl,al
+     *     lodsd
+     *     cmp bl,19h
+     *     loopnz @@nextitem
+     *     stc
+     *     jnz @@norestore     ;not found. no FASTBOOT possible
+     * 
+     *     mov edx, [dwRSeg]
+     *     shl edx, 16
+     *     mov dl, [bBpTab]    ;use the first BP for returning to the monitor
+     *     @dprintf ?RBTDBG,<"vector 19h saved by DOS=%X, temp vector=%X",10>, eax, edx
+     *     mov [OldInt19],eax  ;save the vector stored by DOS
+     *     mov [esi-4],edx
+     * 
+     * ;--- restoring the XBDA should be done by DOS - MS-DOS does, but
+     * ;--- only if the XBDA size won't exceed 1? kB!
+     * ;--- Problem: size of XBDA (byte at offset 0) may be invalid.
+     * if 0;?MOVEXBDA
+     *     movzx esi,word ptr ds:[@XBDA]
+     *     cmp si, 0A000h
+     *     jb @@noxbda
+     *     shl esi, 4
+     *     movzx eax,byte ptr [esi];first byte of XBDA is (rather:should be) size in KB
+     *     sub ds:[@MEM_SIZE],ax   ;restore size of low memory
+     *     movzx edi,word ptr ds:[@MEM_SIZE]
+     *     shl edi, 6
+     *     mov ds:[@XBDA],di
+     *     shl edi, 4
+     *     @dprintf ?RBTDBG, <"restoring XBDA to %X",10>, di
+     *     mov ecx, eax
+     *     shl ecx,8
+     *     rep movsd
+     * @@noxbda:
+     * endif
+     * 
+     * if 0
+     *     in al,0A1h
+     *     or al,03Fh
+     *     out 0A1h,al
+     *     in al,021h
+     *     or al,0F8h
+     *     out 21h,al
+     * endif
+     * 
+     *     clc
+     * @@norestore:
+     *     popad
+     *     ret
+     * restorevecs endp
+     */
+}
+
+
+void fastboot(void)
+{
+    /*
+     * Mapped logic from fastboot in JEMM32.ASM:
+     * fastboot proc
+     * 
+     *     @dprintf ?RBTDBG,<"fastboot reached",10>
+     * 
+     * if 0  ;kbd enable has been done in int 15h handler already
+     *     mov al,0Bh
+     *     out 20h,al
+     *     in al,20h
+     *     and al,al
+     *     jz @@fb_1
+     *     mov al,20h              ; send EOI to master PIC (for keyboard)
+     *     out 20h,al
+     * @@fb_1:
+     *     mov al,0AEh             ; (re)enable keyboard
+     *     out 64h,al
+     * endif
+     * 
+     *     call Begin_Nest_Exec
+     * if 1
+     *     @dprintf ?RBTDBG, <"resetting PS/2 mouse",10>
+     *     mov word ptr [ebp].Client_Reg_Struc.Client_EAX, 0C201h  ;reset PS/2 mouse
+     *     mov eax,15h
+     *     call Exec_Int
+     * endif
+     *     @dprintf ?RBTDBG, <"calling restorevecs",10>
+     *     call restorevecs
+     *     jc _Reboot
+     * 
+     * if ?ADDCONV
+     * ;--- if base memory has been extended beyond A000h, it must be
+     * ;--- restored.
+     *     cmp word ptr ds:[@MEM_SIZE], 640
+     *     jbe @F
+     *     cmp UMBsegments.wSegm, 0A000h
+     *     jnz @F
+     *     mov word ptr ds:[@MEM_SIZE], 640
+     * @@:
+     * endif
+     * 
+     * ;--- (re)launch int 19h. this will make DOS restore vectors.
+     * ;--- since the int 19h value saved by DOS has been modified by Jemm,
+     * ;--- execution will reach fastboot_1 at last.
+     * 
+     *     @dprintf ?RBTDBG, <"fastboot: launching Int 19h",10>
+     * 
+     * ;--- it's bptable.pInt06 that has to be modified -
+     * ;--- because that's the FIRST breakpoint ( see restorevecs ).
+     *     mov ds:[bptable.pInt06], offset fastboot_1
+     *     mov eax,19h
+     *     call Exec_Int
+     * fastboot_1:
+     * 
+     * ;--- now DOS has restored its vectors
+     * ;--- restore the previously modified int 19h vector
+     * 
+     *     @dprintf ?RBTDBG, <"reached fastboot_1",10>
+     *     mov eax,[OldInt19]
+     *     mov ds:[19h*4],eax
+     * if 0
+     *     mov dword ptr ds:[1Eh*4],0F000EFC7h	;restore int 1Eh to original value
+     * endif
+     * 
+     * ;--- the v86 space is now "without" DOS
+     * 
+     * ;--- set vectors 20-3F, 60-67 and 78-FF to 0000:0000
+     * 
+     *     push ds
+     *     pop es
+     *     mov edi,20h*4
+     *     mov ecx,20h
+     *     xor eax,eax
+     *     rep stosd       ;20-3F
+     *     add edi,20h*4
+     *     mov cl,8
+     *     rep stosd       ;60-67
+     *     add edi,10h*4
+     *     mov cl,8
+     *     rep stosd       ;78-7F
+     * 
+     * if 0;?CLEARBOOTFLGS
+     *     movzx ecx, word ptr ds:[@XBDA]
+     *     jecxz @F
+     *     shl ecx, 4
+     *     mov word ptr [ecx+90h],0    ;clear boot flags (can't do this, probably BIOS specific)
+     * @@:
+     * endif
+     * 
+     * if ?RBTDBG
+     *     mov ecx,20h
+     *     xor esi,esi
+     *     xor ebx,ebx
+     * nextitem:
+     *     lodsd
+     *     @dprintf ?RBTDBG,<"%X: %X        ">, bl, eax
+     *     test cl,1
+     *     jz @F
+     *     @dprintf ?RBTDBG,<10>
+     * @@:
+     *     inc ebx
+     *     loop nextitem
+     * endif
+     * 
+     *     mov bl,1        ;set flag for fastboot
+     *     jmp Reboot_1
+     * 
+     * fastboot endp
+     */
+}
+
+// endif
+
+// --- Reboot - reboot the machine
+
+void _Reboot(void)
+{
+    /*
+     * Mapped logic from _Reboot in JEMM32.ASM:
+     * _Reboot proc
+     * 
+     *     @dprintf ?RBTDBG,<"Reboot enter",10>
+     * if ?INT19RBT
+     *     mov eax,19h
+     *     call Exec_Int   ;may not return
+     * endif
+     * Int19_V86Entry::
+     * if ?FASTBOOT
+     *     mov bl,0    ;bit 0: 0="full" reboot, 1=fastboot
+     * endif
+     *     mov eax, DEVICE_REBOOT_NOTIFY
+     *     call vmm_service_table.pControlProc
+     *     test [bV86Flags], V86F_ALTBOOT
+     *     jz Reboot_1
+     * 
+     *     MOV WORD PTR DS:[@RESET_FLAG],1234H ; 1234h=warm boot
+     *     mov al,0FEh
+     *     out 64h,al	;reset via KBC
+     * if 0
+     *     in al,92h   ;reset via PS/2 port A
+     *     or al,1
+     *     out 92h,al
+     * endif
+     * ;    hlt
+     * 
+     * Reboot_1::      ;<--- entry from FASTBOOT (see above)
+     * 
+     *     @dprintf ?RBTDBG, <"Reboot_1 reached, int 19=%X, XBDA segment=%X",10>, dword ptr ds:[19h*4], word ptr ds:[@XBDA]
+     * 
+     *     MOV WORD PTR DS:[@RESET_FLAG],1234H ; 1234h=warm boot
+     * 
+     * if 1
+     *     MOV AL,0Fh  ;set shutdown byte; bit 7: 0=enable NMI
+     *     out 70h,al
+     *     MOV AL,0    ;software-reset
+     *     out 71h,al
+     * endif
+     * 
+     * ife ?USETRIPLEFAULT
+     *     mov edi, 7E00h
+     *     mov esi, offset rmcode
+     *     mov ecx, offset endofrmcode - offset rmcode
+     *     push ds
+     *     pop es
+     *     rep movsb
+     * 
+     *   if ?RESETCR4
+     *    if 0
+     *     cmp [dwFeatures],ecx    ; does CR4 exist?
+     *     jz @F
+     *     .586p                   ; CR4 exists since Pentium ( not exactly true )
+     *     mov cr4, ecx            ; reset CR4
+     *     .486p
+     * @@:
+     *    else
+     *     mov al, 0
+     *     call SetVME             ; just reset CR4.VME
+     *     xor ecx, ecx
+     *    endif
+     *   endif
+     * 
+     *   if ?FASTBOOT
+     *     test bl,1
+     *     jz @F
+     *     sub edi, 5      ;skip the jmp f000:fff0
+     *     mov esi, offset rmcode2
+     *     mov cl, offset endofrmcode2 - offset rmcode2
+     *     rep movsb
+     *     and byte ptr ds:[47Bh],not 20h  ;reset VDS bit
+     *     mov eax, DEVICE_REBOOT_NOTIFY
+     *     call vmm_service_table.pControlProc
+     * @@:
+     *   endif
+     *     xor edx, edx
+     *     push edx
+     *     push word ptr 3FFh
+     *     LIDT FWORD ptr [esp]     ; reset the IDT to real-mode
+     * 
+     *     MOV AX,REAL_DATA_SEL    ; before returning to real-mode set the
+     *     MOV DS,EAX              ; segment register caches
+     *     MOV ES,EAX
+     *     MOV FS,EAX
+     *     MOV GS,EAX
+     *     MOV SS,EAX              ; set SS:ESP
+     *     MOV ESP,7C00h
+     *     MOV ECX,CR0             ; prepare to reset CR0 PE and PG bits
+     *     AND ECX,7FFFFFFEH
+     *     XOR EAX, EAX
+     *     db 66h                 ; jmp REAL_CODE_SEL:7E00h
+     *     db 0eah                ; (this sets CS attributes to 16bit
+     *     Dw 7E00h               ; and FFFF limit)
+     *     dw REAL_CODE_SEL
+     * else
+     *     xor edx,edx             ; cause a triple fault to reboot
+     *     push edx
+     *     push edx
+     *     lidt fword ptr [esp]
+     *     int 3
+     * endif
+     * 
+     * rmcode:
+     *     mov cr0,ecx             ;7E00: 0F 22 C1   mov cr0, ecx (switches to real-mode)
+     *     db 0EAh                 ;7E03: EA         jmp 0000:7E08 (set CS=0000)
+     *     dw 07E08h, 0000h        ;      0000:7E08
+     *     mov cr3,eax             ;7E08: 0F 22 D8   mov cr3, eax
+     *     mov ss,eax              ;7E0B: 8E D0      mov ss, ax (in 16-bit; set SS=0000)
+     *     db 0EAh                 ;7E0D: EA         jmp F000:FFF0
+     *     dw 0FFF0h, 0F000h       ;      F000:FFF0
+     * endofrmcode:
+     * 
+     * if ?FASTBOOT
+     * rmcode2:
+     *  if ?RBTDBG
+     *     db 0B8h, 52h, 0Eh       ;mov ax,0e52h 'R'
+     *     db 0BBh, 07h, 00h       ;mov bx,0007h
+     *     int 10h
+     *     mov al,'B'
+     *     int 10h
+     *     mov al,'T'
+     *     int 10h
+     *     mov ah,0
+     *     int 16h
+     *  endif
+     *  if 0
+     *     push cs
+     *     pop ds
+     *     push cs
+     *     pop es
+     *     sti
+     *     mov ah,00
+     *     mov dl,80h
+     *     int 13h                 ;disk reset
+     *     db 0B8h, 01h, 02h       ;mov ax,0201h
+     *     db 0B9h, 01h, 00h       ;mov cx,0001h
+     *     db 0BAh, 80h, 00h       ;mov dx,0080h
+     *     db 0BBh, 00h, 7Ch       ;mov bx,7C00h
+     *     int 13h                 ;read sector 1 of HD 0
+     *     push es
+     *     push ebx                ;in 16-bit: push bx
+     *     retf                    ;jump to boot code
+     *  else
+     *     int 19h
+     *  endif
+     * endofrmcode2:
+     * endif
+     * 
+     * _Reboot endp
+     */
+}
+
+
+// align 4
+
+// if ?SERVTABLE
+
+// vmm_service_table label VMM_SERV_TABLE
+// dd Simulate_Int
+// dd Simulate_Iret
+// dd Simulate_Far_Call
+// dd Simulate_Far_Ret
+// dd Begin_Nest_Exec
+// dd Exec_Int
+// dd Resume_Exec
+// dd End_Nest_Exec
+// dd Simulate_IO
+// dd Yield
+// dd VDS_Call_Table
+// dd VCPI_Call_Table
+// dd IO_Trap_Table
+// dd V86_Monitor
+// dd offset dwStackCurr
+// dd MoveMemory
+// dd offset pV86Hooks // v5.85
+// dd offset V86_Fault // v5.86
+// dd offset _ret // v5.86: control proc
+
+// endif
+
+// .text$03 ends
+
+// END _start
