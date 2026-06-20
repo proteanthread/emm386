@@ -10,17 +10,17 @@ The diagram below shows the system boot and initialization process when JEMM is 
 
 ```mermaid
 graph TD
-    A[System Boot / Loader Launch] --> B[INIT16 Real-Mode Entry]
-    B --> C[Validate CPU Level & Memory Size]
-    C --> D[Identify E820 / Int 15h Memory Map]
-    D --> E[Allocate Upper Memory Blocks & Page Tables]
-    E --> F[Switch to Protected Mode]
-    F --> G[Initialize JEMM32 Kernel]
-    G --> H[Setup GDT, IDT, and Page Directory]
-    H --> I[Map Extended Memory & EMS Page Frame]
-    I --> J[Establish V86 Mode Context]
-    J --> K[Install Interrupt Hooks: Int 67h, Int 2Fh, Int 15h]
-    K --> L[Return to V86 Real-Mode Supervisor]
+    A["System Boot / Loader Launch"] --> B["INIT16 Real-Mode Entry"]
+    B --> C["Validate CPU Level & Memory Size"]
+    C --> D["Identify E820 / Int 15h Memory Map"]
+    D --> E["Allocate Upper Memory Blocks & Page Tables"]
+    E --> F["Switch to Protected Mode"]
+    F --> G["Initialize JEMM32 Kernel"]
+    G --> H["Setup GDT, IDT, and Page Directory"]
+    H --> I["Map Extended Memory & EMS Page Frame"]
+    I --> J["Establish V86 Mode Context"]
+    J --> K["Install Interrupt Hooks: Int 67h, Int 2Fh, Int 15h"]
+    K --> L["Return to V86 Real-Mode Supervisor"]
 ```
 
 ---
@@ -31,17 +31,17 @@ This flowchart describes how `JLOAD` loads a Jemm Loadable Module (JLM) and regi
 
 ```mermaid
 graph TD
-    A[JLOAD.EXE Invocation] --> B[Load PE executable JLM file]
-    B --> C[Resolve Relocations & Imports]
-    C --> D[Retrieve VMM Service Table from JLM.H]
-    D --> E[Call JLM Entry Point: DllMain / main]
-    E --> F{Is Load Request?}
-    F -- Yes --> G[Register Device Description Block DDB]
-    G --> H[Hook Interrupts / Traps via VMM Services]
-    H --> I[Return Success (suppress JLoad message via Bit 31)]
-    F -- No / Unload --> J[Unhook Interrupts & Trap Handlers]
-    J --> K[Remove DDB from VMM Chain]
-    K --> L[Free JLM Memory & Terminate]
+    A["JLOAD.EXE Invocation"] --> B["Load PE executable JLM file"]
+    B --> C["Resolve Relocations & Imports"]
+    C --> D["Retrieve VMM Service Table from JLM.H"]
+    D --> E["Call JLM Entry Point: DllMain / main"]
+    E --> F{"Is Load Request?"}
+    F -- "Yes" --> G["Register Device Description Block DDB"]
+    G --> H["Hook Interrupts / Traps via VMM Services"]
+    H --> I["Return Success (suppress JLoad message via Bit 31)"]
+    F -- "No / Unload" --> J["Unhook Interrupts & Trap Handlers"]
+    J --> K["Remove DDB from VMM Chain"]
+    K --> L["Free JLM Memory & Terminate"]
 ```
 
 ---

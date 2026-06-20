@@ -22,7 +22,7 @@ Size: 8928 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\flowchart.md
-Size: 5036 bytes
+Size: 5088 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\MEMORY_TUTORIAL.md
@@ -486,7 +486,7 @@ Size: 32578 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: SOURCETREE_MAP.txt
-Size: 68298 bytes
+Size: 69234 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: src\AUXIO.h
