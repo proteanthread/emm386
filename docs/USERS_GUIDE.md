@@ -61,13 +61,11 @@ DEVICE=C:\DOS\EMM386.EXE NOEMS I=C800-EFFF
 - **Interrupt Redirections**: Software interrupts `INT 67h` (EMS), `INT 2Fh` (XMS), and `INT 15h` (V86 control) are intercepted by EMM386, resulting in a microscopic interrupt dispatch latency (nanoseconds).
 - **Driver Relocations**: Running `LH` or `DEVICEHIGH` relocates programs to the UMA, freeing conventional memory up to 620KB+ for standard DOS programs.
 
----
-
 ## 6. BSD Virtual Memory Integration
 
-EMM386 integrates with the LibreDOS kernel to support modern 64-bit flat memory clients via the **LMS64 Module**:
-- **Host Page Mapping**: LMS64 incorporates BSD-style virtual memory mappings. When a 64-bit application initiates memory operations, it uses BSD-style parameters (e.g. `PROT_READ`, `PROT_WRITE`, `MAP_ANONYMOUS`).
-- **Paging Limits**: The user can configure the maximum virtual and physical memory pools allocated above the 4GB boundary. These are mapped dynamically using a 4-level PML4 paging table managed by EMM386.
+EMM386 itself does not need to access physical memory above 4GB directly (which is handled natively and automatically by the LibreDOS kernel). However, EMM386 provides the compatibility interfaces to allow legacy/DPMI applications to access these memory pools (above 1MB to 4GB or more):
+- **Host Page Mapping**: When a 64-bit DPMI client is executed, EMM386 hooks it into the **LMS64 Module**. The client requests allocations using standard BSD-style virtual memory mappings (e.g. `PROT_READ`, `PROT_WRITE`, `MAP_ANONYMOUS`).
+- **Paging Bridge**: These allocations are mapped dynamically using a 4-level PML4 paging table structure managed by LMS64 and routed directly to the underlying LibreDOS kernel page allocator.
 
 ---
 

@@ -6,12 +6,12 @@ This document presents the official verification and validation of **EMM386** ag
 
 ## 1. Compliance Matrix by Physical Memory Capacity
 
-| Physical RAM | Memory Mode | Paging Hierarchy | LMS64 Activation | Architectural Behavior |
+| Host RAM Configuration | Kernel Memory Mode | EMM386 Role for Legacy Applications | LMS64 Activation | Architectural Behavior |
 | :--- | :--- | :--- | :--- | :--- |
-| **1GB - 2GB** | 32-Bit Protected / V86 | 2-Level Paging (4KB/4MB) | Disabled | Fully identity-mapped real-mode space. Memory allocations are locked under the 2GB boundary. |
-| **4GB** | 32-Bit Protected / V86 | 2-Level Paging (4KB/4MB) | Disabled | Max physical limit for standard 32-bit memory management. Access above 4GB is blocked. |
-| **8GB - 16GB** | x86-64 Long Mode | 4-Level PML4 Paging | Enabled | PML4 maps memory above the 4GB boundary. Physical page pool starts at `0x200000000ULL` (8GB). |
-| **32GB - 64GB+**| x86-64 Long Mode | 4-Level PML4 Paging | Enabled | Supports large scale host physical allocations. Allocates memory up to hardware limits. |
+| **1GB - 2GB** | Native 32-bit Flat Paging | Provides standard XMS 2.0/3.0 & EMS 4.0 up to 2GB | Disabled | Kernel natively maps RAM under 2GB. EMM386 exposes standard real-mode compatibility mappings. |
+| **4GB** | Native 32-bit Flat Paging | Provides standard XMS 2.0/3.0 & EMS 4.0 up to 4GB | Disabled | Kernel manages full 4GB space. EMM386 serves legacy real-mode and protected-mode (DPMI32) applications. |
+| **8GB - 16GB** | Native 64-bit Flat Paging | Exposes virtual mappings above 4GB via 64-bit DPMI | Enabled | Kernel automatically manages physical pages above 4GB. EMM386 enables legacy DPMI clients to access these pages via PML4. |
+| **32GB - 64GB+**| Native 64-bit Flat Paging | Exposes virtual mappings above 4GB via 64-bit DPMI | Enabled | Kernel automatically manages high physical pools. EMM386 bridges DPMI64 clients to the host page allocator. |
 
 ---
 
@@ -29,11 +29,11 @@ Upon detecting these hooks, the LibreDOS kernel yields built-in EMS and XMS emul
 - **Real-Mode Wrapper**: EMM386 respects standard `Segment:Offset` address wrapping inside virtualized 1MB spaces (`dos_chunk_t`).
 - **UMB Injection**: Upper memory blocks allocated by EMM386 are linked directly into the DOS Memory Control Block (MCB) chain, permitting load-high capabilities (`LH`, `DEVICEHIGH`).
 
-### C. LMS64 DPMI Virtualization
-For host configurations **above 4GB** (8GB, 16GB, 32GB, 64GB+):
-- Standard 32-bit paging cannot address memory beyond 4GB due to 32-bit register and Page Table Entry limits.
-- EMM386 loads the **LMS64 Flat Memory Module**, transitioning execution into x86-64 long mode.
-- LMS64 uses a 4-level PML4 paging table to map host virtual spaces above the 4GB boundary (`0x100000000ULL`), giving 64-bit clients direct access to high physical RAM.
+### C. LMS64 DPMI Virtualization & Kernel Handover
+EMM386 itself does not need to access physical memory above 4GB directly for its own execution, as the LibreDOS kernel core natively handles page allocation and mapping above 4GB. Instead, EMM386 serves as a compatibility bridge:
+- It provides legacy applications access to memory above 1MB (up to 4GB or more) based on the LibreDOS Memory Specification (LMS).
+- When a 64-bit client requests memory beyond 4GB, EMM386 loads the **LMS64 Flat Memory Module** to establish a 4-level PML4 paging table.
+- This module translates the client's BSD-style memory mappings (`mmap`/`munmap`/`mprotect`) and interfaces with the underlying LibreDOS kernel page allocator, allowing the legacy 64-bit DPMI application to safely utilize the high host memory.
 
 ---
 

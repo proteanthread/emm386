@@ -88,8 +88,8 @@ When a 64-bit client calls a real-mode interrupt:
 
 ## 7. BSD Virtual Memory Integration
 
-LMS64 incorporates BSD-style virtual memory management primitives directly onto x86 hardware paging structures:
-- **Anonymous Allocations**: When a client requests `MAP_ANONYMOUS`, LMS64 simulates physical memory allocation above the 8GB boundary and links it to the page directory tables.
+EMM386 itself does not direct or control physical RAM above 4GB, which is handled automatically by the LibreDOS kernel core. Instead, LMS64 acts as a translation layer to map BSD-style virtual memory requests for 64-bit client execution:
+- **Anonymous Allocations**: When a client requests `MAP_ANONYMOUS`, LMS64 hooks into the host kernel's pager pool, referencing allocated pages above the 8GB boundary and linking them to the client's PML4 page directory tables.
 - **Page Access Control**: Mappings set with `PROT_READ` or `PROT_WRITE` translate directly to CPU paging flags (`PTE_WRITE` disabled or enabled), and `PROT_EXEC` modifications manage the CPU `PTE_NX` (No-Execute) hardware protection bit.
 
 ---

@@ -10,7 +10,7 @@ Size: 4922 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: docs\ARCHITECTURE_NOTES.md
-Size: 6139 bytes
+Size: 6315 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\COMPILERS_GUIDE.md
@@ -26,7 +26,7 @@ Size: 5088 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\KERNEL_INTEGRATION_VERIFICATION.md
-Size: 5433 bytes
+Size: 5994 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\MEMORY_TUTORIAL.md
@@ -34,11 +34,11 @@ Size: 6011 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\PROGRAMMERS_GUIDE.md
-Size: 7090 bytes
+Size: 7226 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\USERS_GUIDE.md
-Size: 5021 bytes
+Size: 5202 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: History.txt
@@ -490,7 +490,7 @@ Size: 32578 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: SOURCETREE_MAP.txt
-Size: 69234 bytes
+Size: 69437 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: src\AUXIO.h

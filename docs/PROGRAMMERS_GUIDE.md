@@ -100,9 +100,9 @@ int lms64_mprotect(void *addr, size_t length, int prot);
 
 ## 7. BSD Virtual Memory Integration
 
-LMS64 integrates BSD-style virtual memory mechanics directly into the x86-64 long mode execution layout:
+While the LibreDOS kernel natively and automatically manages physical memory above 4GB, EMM386 uses the LMS64 helper module to bridge legacy 64-bit DPMI applications to these pools using BSD-style interfaces:
 - **mmap Memory Mapping**: When a 64-bit application calls `lms64_mmap`, it uses standard BSD arguments (`PROT_READ`, `PROT_WRITE`, `MAP_PRIVATE`, `MAP_ANONYMOUS`).
-- **4-Level Page Mappings**: The DPMI host translates these parameters into PML4, PDPT, PD, and PT page table entries, setting appropriate bits (`PTE_USER`, `PTE_WRITE`, `PTE_NX`).
+- **Paging Translation**: LMS64 maps these configurations into 4-level PML4, PDPT, PD, and PT page table entries (`PTE_USER`, `PTE_WRITE`, `PTE_NX` flags) and interfaces with the underlying kernel page allocator.
 
 ---
 
