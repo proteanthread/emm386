@@ -9,12 +9,32 @@ File: Artistic.txt
 Size: 4922 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
+File: docs\ARCHITECTURE_NOTES.md
+Size: 6139 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: docs\COMPILERS_GUIDE.md
+Size: 5155 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
 File: docs\EMS_UMB_SPEC.md
 Size: 8928 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: docs\flowchart.md
-Size: 5016 bytes
+Size: 5036 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: docs\MEMORY_TUTORIAL.md
+Size: 6011 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: docs\PROGRAMMERS_GUIDE.md
+Size: 7090 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
+File: docs\USERS_GUIDE.md
+Size: 5021 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
 File: History.txt
@@ -466,7 +486,7 @@ Size: 32578 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: SOURCETREE_MAP.txt
-Size: 67695 bytes
+Size: 68298 bytes
 Description: Documentation file.
 --------------------------------------------------------------------------------
 File: src\AUXIO.h

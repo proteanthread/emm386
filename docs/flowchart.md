@@ -52,15 +52,15 @@ This flowchart details how a 64-bit DPMI client executes in x86-64 long mode, ma
 
 ```mermaid
 graph TD
-    A[64-Bit DPMI Client Request: lms64_mmap] --> B[Parse Virtual Address, Length, and Permissions]
-    B --> C[Align Request to 4KB Page Boundaries]
-    C --> D[Scan Global Host Page Pool above 4GB]
-    D --> E[Walk Client PML4 -> PDPT -> PD -> PT Structures]
-    E --> F[Allocate Intermediate Page Directory Tables if Missing]
-    F --> G[Write Page Table Entries PTEs with Physical Address & Attributes]
-    G --> H[Invalidate TLB Cache via invlpg]
-    H --> I[Track Region Descriptor in g_regions Array]
-    I --> J[Return 64-Bit Virtual Address Pointer to Client]
+    A["64-Bit DPMI Client Request: lms64_mmap"] --> B["Parse Virtual Address, Length, and Permissions"]
+    B --> C["Align Request to 4KB Page Boundaries"]
+    C --> D["Scan Global Host Page Pool above 4GB"]
+    D --> E["Walk Client PML4 -> PDPT -> PD -> PT Structures"]
+    E --> F["Allocate Intermediate Page Directory Tables if Missing"]
+    F --> G["Write Page Table Entries PTEs with Physical Address & Attributes"]
+    G --> H["Invalidate TLB Cache via invlpg"]
+    H --> I["Track Region Descriptor in g_regions Array"]
+    I --> J["Return 64-Bit Virtual Address Pointer to Client"]
 ```
 
 ---
