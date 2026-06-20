@@ -25,6 +25,10 @@ File: docs\flowchart.md
 Size: 5088 bytes
 Description: Repository source or configuration asset.
 --------------------------------------------------------------------------------
+File: docs\KERNEL_INTEGRATION_VERIFICATION.md
+Size: 5433 bytes
+Description: Repository source or configuration asset.
+--------------------------------------------------------------------------------
 File: docs\MEMORY_TUTORIAL.md
 Size: 6011 bytes
 Description: Repository source or configuration asset.
