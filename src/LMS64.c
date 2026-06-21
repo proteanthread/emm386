@@ -5,17 +5,22 @@
  *   Implements the 64-bit protected-mode page mapping logic (PML4 table hierarchy) and exposes
  *   the BSD-style virtual memory management APIs for 64-bit DPMI clients in x86-64 long mode.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Virtual memory region scanning policies, allocation algorithms, and logs.
- *   - CANNOT BE CHANGED: Paging structure bitflags (PTE/PDE formats), alignment constraints,
- *     and calling register definitions to ensure strict processor execution compatibility.
+ * What Can Be Changed:
+ *   - Virtual memory region scanning policies, allocation algorithms, and logs.
+ *   - Internal region lookup size (MAX_REGIONS).
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Paging structure bitflags (PTE/PDE/PML4 formats), alignment constraints, and calling register definitions to ensure strict processor execution compatibility.
+ *   - Page frame allocation size.
+ *
+ * Expected Behaviour:
  *   - Maps 64-bit virtual segments above 4GB to host physical addresses using 4-level paging.
  *   - Clears TLB entries upon unmapping to guarantee thread/process isolation.
+ *   - Controls 64-bit virtual memory mappings, maps virtual addresses above 4GB, and updates page table hierarchies.
  *
- * Diagnostics & Recovery:
- *   - Panic-halts execution if critical page directories cannot be allocated during mapping.
+ * What To Do If Something Breaks Or Does Not Work:
+ *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Check PML4 index calculation limits, monitor allocation bounds, and verify page protection bit state overrides.
  */
 
 #include "LMS64.h"

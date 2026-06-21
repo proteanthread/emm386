@@ -4,16 +4,38 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing DEV.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Helper function details, additional device commands logic inside the IOCTL handlers, debug logging flags.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - EMMXXXX0 device driver strategy/interrupt entry signatures, request header offset layouts (request_hdr struct offsets), segment size APIs.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Handles EMMXXXX0 DOS driver IOCTL read/write commands, system variable requests, and API query entry operations.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Check buffer linear address calculations, count parameters, and confirm that invalid functions properly flag errors via Carry status.
  */
+
+// --- publics/externals
+
+// --- DOS device request
+
+// --- macros
+
+//   assume SS:FLAT,DS:FLAT,ES:FLAT
+
+// .text$01 SEGMENT
+
+// dwReqPtr        dd  0   ; device strategy request ptr
+
+// .text$01 ends
+
+// .text$03 segment
+
+// --- EMMXXXX0 strategy routine
 
 // .486P
 // .model FLAT

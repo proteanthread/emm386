@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing POOL.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Memory page block search policy, page replacement models.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Pool base page address parameters, pool descriptor tables.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Tracks allocation and release of EMS/XMS physical memory pages inside a centralized pool database.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Check boundary address alignments and debug index lookup tables.
  */
 
 // .486P

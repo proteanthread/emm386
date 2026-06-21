@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing EMS.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Page allocation optimization limits, maximum physical page thresholds (?MAXPHYSPG), VCPI calling structures, debug/error message log strings.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Int 67h interrupt handler vectors, page table entry (PTE) status bitmask constants, EMS absolute mapping tables, physical page translation arrays.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Operates as the Expanded Memory Manager entry point (Int 67h) and routes sub-functions for map page requests, handle info lookup, and VCPI client execution.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Examine the page directory pointer mapping logic, check for handle leakages in names, and test VCPI registers translation integrity.
  */
 
 // .486P

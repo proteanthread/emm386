@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing UMB.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - UMB allocation list strategies, logging messages.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - UMB segment boundaries (A000-FFFF), upper memory blocks tracking APIs.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Monitors and manages allocation of Upper Memory Blocks (UMBs) for real-mode clients.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Check segment bounds overlapping and verify mapping descriptors.
  */
 
 // .486P

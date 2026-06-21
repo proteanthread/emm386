@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing INIT.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Initialization command line string parses, initial environment setups, logging outputs.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Page directory allocations, GDT/IDT descriptors setup, CPU state transit logic (Real to Protected/V86).
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Runs initialization code that maps memory layout, configures paging structures, establishes the GDT/IDT, and loads the V86 monitors.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Track early paging directory configurations, CR3/CR4 register states, and debug print codes.
  */
 
 // .486P

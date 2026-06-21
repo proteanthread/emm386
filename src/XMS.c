@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing XMS.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Handle allocation capacities, HMA min sizing limits.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - XMS entry interfaces, A20 gate controller protocols, XMS handle descriptors table format.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Manages Extended Memory Specification (XMS) functions, checks handle availability, and opens/closes A20 gate states.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Confirm A20 status registers, lock count overflow flags, and handle range allocations.
  */
 
 // .486P

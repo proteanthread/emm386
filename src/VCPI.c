@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing VCPI.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - VCPI diagnostics code, detail listings of active pages.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - VCPI execution interface specifications, linear-to-physical address translation conventions.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Services the Virtual Control Program Interface (VCPI) routines, enabling client tasks to transition between Real/V86 and Protected modes.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Inspect client page allocation status tables and review registers status upon transition failure.
  */
 
 // .486P

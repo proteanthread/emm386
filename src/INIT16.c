@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing INIT16.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Error descriptions, diagnostic print statements.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Real-mode memory sizing routines, stack configurations, CPU descriptor table layout.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Initializes system properties in 16-bit real mode prior to shifting execution flow to flat protect mode.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Verify CPU type checks, memory map bounds, and ensure hardware interrupts are correctly masked.
  */
 
 // .MODEL tiny

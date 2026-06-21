@@ -4,16 +4,27 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing DEBUG.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Local debugging output formats, diagnostic messages, slowdown loop constants (e.g., SLOWDOWN value).
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Low-level video RAM page/color registers (0B8000h/0B0000h), bios data area segment address definitions, parameter stack layouts, and VPUTCHR calling signatures.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Intercepts character streams and prints them to mono/color screens or redirects output to a kernel debugger.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Verify screen memory addresses, video mode detection checks, or debugger stack layouts if system lockups occur.
  */
+
+// SLOWDOWN equ 256            ;to slow down debug displays
+
+// --- publics/externals
+
+// --- make no assumptions about DS and ES here!
+// --- also don't push/pop segment registers!
 
 // .486P
 // .model FLAT

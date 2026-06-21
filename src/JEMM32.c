@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing JEMM32.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Exception diagnostic info prints, task status prints.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Protected mode hardware interrupt handler entries, IDT gate configurations, TSS structures.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Drives the central protected mode V86 execution loop, handles GPFs/exceptions, page faults, and hardware interrupts.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Inspect exception error codes, verify task registers, and trace hardware interrupt routing.
  */
 
 // TITLE JEMM - Virtual 8086-Monitor

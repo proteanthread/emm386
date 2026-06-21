@@ -4,16 +4,34 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing EMU.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Local helper functions, logging wrappers, and diagnostic outputs.
+ *   - Addition of supported opcode templates, conditional flags (e.g., EMUCLTS).
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ *   - Self-modifying instruction template (EmuInstr location and size), exception handling vectors, and privilege level checks.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Detects and emulates privileged x86 instruction execution (like CLTS, INVD, WBINVD, WRMSR, RDTSC, RDMSR) in V86 mode.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Ensure CPU instruction decoding is correct, inspect self-modifying code execution states, and verify client register stack alignments.
  */
+
+// EMUCLTS equ 0	; 1=emulate CLTS ( resets TS bit in CR0 )
+
+// --- publics/externals
+
+//   assume SS:FLAT,DS:FLAT,ES:FLAT
+
+// --- emulate some privileged 0Fh opcodes (not HLT)
+// --- ebp -> client struct
+// --- ESI -> linear address of CS:EIP
+// --- AL==0Fh
+// --- this is not called, but jumped to
 
 // .486P
 // .model FLAT

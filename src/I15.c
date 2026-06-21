@@ -4,16 +4,50 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing I15.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Debug displays, custom memory sizing policies.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Int 15h hook vectors, system memory size query response registers, BIOS memory allocation block offsets.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Intercepts Int 15h system services to manage and report extended memory allocations (AH=87h, AH=88h).
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Verify caller stack setups, check segment boundary parameters, and trace return status codes.
  */
+
+// --- segment definitions
+
+// --- publics/externals
+
+// --- start
+
+//   assume SS:FLAT,DS:FLAT,ES:FLAT
+
+// --- expected GDT structure pointed to by ES:SI for int 15h, ah=87
+
+//************************************************************
+// simulate INT15/87
+//
+//INT 15 - SYSTEM - COPY EXTENDED MEMORY (by RBIL)
+//        AH = 87h
+//        CX = number of words to copy (max 8000h)
+//        ES:SI -> GDT (see I15MOVE)
+//Return: CF set on error
+//        CF clear if successful
+//        AH = status 
+//
+//Values for extended-memory copy status (RBIL):
+// 00h    source copied into destination
+// 01h    parity error
+// 02h    interrupt error
+// 03h    address line 20 gating failed
+// 80h    invalid command (PC,PCjr)
+// 86h    unsupported function (XT,PS30)
+//************************************************************
 
 // .486P
 // .model FLAT

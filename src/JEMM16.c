@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing JEMM16.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Command parameter parse routines, help screen messages.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Real-mode device driver headers, interrupt vectors, API entry interfaces.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Provides the 16-bit real-mode driver entry endpoints for installation and load configurations of JEMM.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Check DOS device header links and check for load address conflicts.
  */
 
 // .286

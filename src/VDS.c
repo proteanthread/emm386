@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing VDS.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - Logging statements, tracking buffer sizes.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Virtual DMA Services (VDS) function call tables, entry signatures, and response status bytes.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Implements VDS specification services to authorize and map scatter/gather buffers.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Examine page alignment attributes and check block boundaries.
  */
 
 // .486

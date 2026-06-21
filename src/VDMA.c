@@ -4,15 +4,19 @@
  * Architectural Role:
  *   Serves as the C counterpart source representing VDMA.ASM.
  *
- * Changeability & Constraints:
- *   - CAN BE CHANGED: Local helper functions, logging wrappers, and diagnostic outputs.
- *   - CANNOT BE CHANGED: Standard API calling conventions, hardware entry vectors, and binary structure alignments.
+ * What Can Be Changed:
+ *   - DMA logging options, diagnostic dumps.
  *
- * Expected Behavior:
+ * What Cannot Be Changed:
+ *   - Hardware DMA controller ports definitions, transfer buffer size limitations.
+ *
+ * Expected Behaviour:
  *   - Mapped counterpart declarations and logic flow from the original assembly source.
+ *   - Virtualizes and intercepts hardware DMA accesses, mapping physical address spaces for device controllers.
  *
- * Diagnostics & Recovery:
+ * What To Do If Something Breaks Or Does Not Work:
  *   - Verify compiler alignment flags and register preservation states if system lockups occur.
+ *   - Check DMA channel registers, track translation registers, and review controller status lines.
  */
 
 // .486P
